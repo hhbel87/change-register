@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sales Estimating Register — Plan Changes & Post-Prelim Additional Items</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --brand: #1B3A2D;
+    --brand-mid: #2D6A4F;
+    --brand-light: #E8F4EE;
+    --accent: #C9782A;
+    --accent-light: #FDF3E7;
+    --plan-bg: #EBF3FB;
+    --plan-text: #0C3D6B;
+    --plan-border: #91C0E8;
+    --add-bg: #FDF3E7;
+    --add-text: #7A3C0A;
+    --add-border: #EDB97A;
+    --surface: #ffffff;
+    --surface2: #F7F8F6;
+    --surface3: #EFF1EE;
+    --border: #DDE1D9;
+    --border2: #C8CEC3;
+    --text: #1A1F18;
+    --text2: #4A5247;
+    --text3: #7A8178;
+    --success: #2D6A4F;
+    --success-bg: #E8F4EE;
+    --warning: #8A5700;
+    --warning-bg: #FDF3E7;
+    --danger: #8B2020;
+    --danger-bg: #FBEAEA;
+    --queried-bg: #EEEDFE;
+    --queried-text: #3D2D8A;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--brand);
+    color: #fff;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 32px; height: 32px; background: var(--brand-mid); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .header-title { font-size: 14px; font-weight: 600; letter-spacing: 0.01em; }
+  .header-sub { font-size: 12px; opacity: 0.6; margin-top: 1px; }
+  .sync-status { font-size: 12px; display: flex; align-items: center; gap: 6px; opacity: 0.8; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #52C97F; }
+  .sync-dot.syncing { background: var(--accent); animation: pulse 1s infinite; }
+  .sync-dot.error { background: #E05252; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  /* Layout */
+  .layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 56px); }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-section { padding: 0 1rem; margin-bottom: 8px; }
+  .sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); padding: 0 0.75rem; margin-bottom: 4px; }
+  .nav-btn {
+    width: 100%; text-align: left; padding: 8px 12px; border: none; background: none;
+    border-radius: var(--radius); cursor: pointer; font-size: 14px; color: var(--text2);
+    display: flex; align-items: center; gap: 10px; transition: all 0.12s;
+  }
+  .nav-btn:hover { background: var(--surface2); color: var(--text); }
+  .nav-btn.active { background: var(--brand-light); color: var(--brand); font-weight: 600; }
+  .nav-btn i { font-size: 17px; }
+  .sidebar-divider { height: 1px; background: var(--border); margin: 8px 1rem; }
+  .sidebar-stats { padding: 1rem; margin-top: auto; }
+  .stat-pill { background: var(--surface2); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 8px; }
+  .stat-pill-label { font-size: 11px; color: var(--text3); }
+  .stat-pill-val { font-size: 18px; font-weight: 700; color: var(--brand); }
+
+  /* Main */
+  .main { padding: 2rem; overflow-y: auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Page header */
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .page-header h1 { font-size: 20px; font-weight: 700; color: var(--text); }
+  .page-header p { font-size: 13px; color: var(--text3); margin-top: 2px; }
+
+  /* Summary metrics */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
+  .metric-card.accent { border-left: 3px solid var(--brand-mid); }
+  .mc-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 6px; }
+  .mc-val { font-size: 24px; font-weight: 700; color: var(--text); }
+  .mc-val.green { color: var(--success); }
+  .mc-val.amber { color: var(--warning); }
+  .mc-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* Filter bar */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+  .filter-bar select, .filter-bar input[type=text] { font-size: 13px; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); }
+  .filter-bar input[type=text] { min-width: 200px; }
+
+  /* Change cards */
+  .changes-list { display: flex; flex-direction: column; gap: 10px; }
+  .change-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem; box-shadow: var(--shadow); transition: box-shadow 0.15s;
+  }
+  .change-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .change-card.plan-border { border-left: 3px solid var(--plan-border); }
+  .change-card.add-border { border-left: 3px solid var(--add-border); }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .cr-num { font-size: 12px; font-weight: 700; color: var(--text3); font-variant-numeric: tabular-nums; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge-plan { background: var(--plan-bg); color: var(--plan-text); }
+  .badge-add { background: var(--add-bg); color: var(--add-text); }
+  .badge-pending { background: var(--warning-bg); color: var(--warning); }
+  .badge-approved { background: var(--success-bg); color: var(--success); }
+  .badge-rejected { background: var(--danger-bg); color: var(--danger); }
+  .badge-queried { background: var(--queried-bg); color: var(--queried-text); }
+  .card-desc { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 8px; }
+  .card-field { display: flex; flex-direction: column; gap: 2px; }
+  .cf-label { font-size: 11px; color: var(--text3); font-weight: 500; }
+  .cf-val { font-size: 13px; font-weight: 600; color: var(--text); }
+  .cf-val.cost { color: var(--success); }
+  .cf-val.time { color: var(--warning); }
+  .card-notes { font-size: 12px; color: var(--text2); border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
+  .card-photo { font-size: 12px; color: var(--text3); margin-top: 4px; }
+  .card-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+  .act-btn { padding: 5px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: none; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text2); display: flex; align-items: center; gap: 5px; transition: all 0.12s; }
+  .act-btn:hover { background: var(--surface2); }
+  .act-btn.approve { border-color: var(--brand-mid); color: var(--success); }
+  .act-btn.approve:hover { background: var(--success-bg); }
+  .act-btn.reject { border-color: #D07070; color: var(--danger); }
+  .act-btn.reject:hover { background: var(--danger-bg); }
+  .act-btn.del:hover { background: var(--danger-bg); color: var(--danger); border-color: #D07070; }
+
+  /* Form */
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow); max-width: 720px; }
+  .form-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); margin: 1.25rem 0 0.75rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+  .form-section-title:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .fg-full { grid-column: 1 / -1; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 12px; font-weight: 600; color: var(--text2); }
+  input[type=text], input[type=number], input[type=date], select, textarea {
+    padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: 14px; font-family: inherit; color: var(--text); background: var(--surface);
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--brand-mid); box-shadow: 0 0 0 3px rgba(45,106,79,0.1); }
+  textarea { resize: vertical; min-height: 72px; }
+  .type-row { display: flex; gap: 10px; }
+  .type-opt { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: var(--radius); cursor: pointer; font-size: 13px; font-weight: 600; text-align: center; transition: all 0.15s; color: var(--text2); background: var(--surface); }
+  .type-opt:hover { border-color: var(--border2); }
+  .type-opt.sel-plan { border-color: var(--plan-border); background: var(--plan-bg); color: var(--plan-text); }
+  .type-opt.sel-add { border-color: var(--add-border); background: var(--add-bg); color: var(--add-text); }
+  .type-opt i { display: block; font-size: 22px; margin-bottom: 4px; }
+  .hint { font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .form-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .btn { padding: 9px 22px; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .btn-ghost { border: 1px solid var(--border); background: none; color: var(--text2); }
+  .btn-ghost:hover { background: var(--surface2); }
+  .btn-primary { border: none; background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: var(--brand-mid); }
+
+  /* Summary breakdown */
+  .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 1rem; }
+  .breakdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; }
+  .bc-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .bc-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .bc-row:last-child { border-bottom: none; }
+  .bc-row-label { color: var(--text2); }
+  .bc-row-val { font-weight: 600; }
+  .alert-box { margin-top: 14px; padding: 12px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+  .alert-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid #E8C070; }
+  .alert-info { background: var(--brand-light); color: var(--brand); border: 1px solid #8FBFAA; }
+
+  /* Empty */
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text3); }
+  .empty-state i { font-size: 48px; opacity: 0.25; display: block; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--brand); color: #fff; padding: 12px 18px; border-radius: var(--radius); font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 999; opacity: 0; transform: translateY(8px); transition: all 0.25s; pointer-events: none; display: flex; align-items: center; gap: 8px; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.error { background: var(--danger); }
+
+  /* Loading */
+  .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; z-index: 200; flex-direction: column; gap: 12px; font-size: 14px; color: var(--text2); }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .metrics { grid-template-columns: repeat(2,1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+    .breakdown-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo"><i class="ti ti-building-estate" style="color:#fff;font-size:18px"></i></div>
+    <div>
+      <div class="header-title">Sales Estimating Register</div>
+      <div class="header-sub">Plan changes &amp; post-prelim additional items</div>
+    </div>
+  </div>
+  <div class="sync-status" id="syncStatus">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncLabel">Connected</span>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Views</div>
+      <button class="nav-btn active" onclick="nav('register')"><i class="ti ti-list-check"></i> Change register</button>
+      <button class="nav-btn" onclick="nav('add')"><i class="ti ti-plus"></i> Log a change</button>
+      <button class="nav-btn" onclick="nav('summary')"><i class="ti ti-chart-pie"></i> Summary</button>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Filter by status</div>
+      <button class="nav-btn" onclick="quickFilter('')"><i class="ti ti-filter-off"></i> All changes</button>
+      <button class="nav-btn" onclick="quickFilter('Pending')"><i class="ti ti-clock"></i> Pending</button>
+      <button class="nav-btn" onclick="quickFilter('Approved')"><i class="ti ti-circle-check"></i> Approved</button>
+      <button class="nav-btn" onclick="quickFilter('Queried')"><i class="ti ti-help-circle"></i> Queried</button>
+      <button class="nav-btn" onclick="quickFilter('Rejected')"><i class="ti ti-circle-x"></i> Rejected</button>
+    </div>
+    <div class="sidebar-stats" id="sidebarStats"></div>
+  </nav>
+
+  <main class="main">
+
+    <!-- Register -->
+    <div class="page active" id="page-register">
+      <div class="page-header">
+        <div><h1>Change register</h1><p id="registerSubtitle">All logged changes</p></div>
+        <button class="btn btn-primary" onclick="nav('add')"><i class="ti ti-plus" style="vertical-align:-2px"></i> Log change</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="Search description or client..." oninput="renderList()" />
+        <select id="filterType" onchange="renderList()">
+          <option value="">All types</option>
+          <option value="Plan A change">Plan A changes</option>
+          <option value="Additional inclusion">Post-prelim additions</option>
+        </select>
+        <select id="filterStatus" onchange="renderList()">
+          <option value="">All statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Queried">Queried</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="changes-list" id="changesList"></div>
+    </div>
+
+    <!-- Log form -->
+    <div class="page" id="page-add">
+      <div class="page-header">
+        <div><h1>Log a change</h1><p>Record a plan change or post-prelim additional item</p></div>
+      </div>
+      <div class="form-card">
+        <p class="form-section-title">Change type</p>
+        <div class="type-row">
+          <div class="type-opt sel-plan" id="type-plan" onclick="selectType('Plan A change')">
+            <i class="ti ti-versions"></i>Plan A change
+          </div>
+          <div class="type-opt" id="type-add" onclick="selectType('Additional inclusion')">
+            <i class="ti ti-circle-plus"></i>Post-prelim additional item
+          </div>
+        </div>
+
+        <p class="form-section-title">Details</p>
+        <div class="form-grid">
+          <div class="form-group fg-full">
+            <label>Description of change *</label>
+            <textarea id="f-desc" placeholder="e.g. Client requested relocation of ensuite window and addition of second vanity"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Client / project name</label>
+            <input type="text" id="f-client" placeholder="e.g. Johnson Residence — Lot 14" />
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="f-date" />
+          </div>
+          <div class="form-group">
+            <label>Requested by</label>
+            <input type="text" id="f-requestedby" placeholder="e.g. Client / Sales consultant / Builder" />
+          </div>
+          <div class="form-group">
+            <label>Approval status</label>
+            <select id="f-status">
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Queried">Queried</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="form-section-title">Cost &amp; schedule impact</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Cost impact ($)</label>
+            <input type="number" id="f-cost" placeholder="0.00" step="0.01" />
+            <span class="hint">Use negative values for cost reductions</span>
+          </div>
+          <div class="form-group">
+            <label>Schedule impact (days)</label>
+            <input type="number" id="f-days" placeholder="0" />
+            <span class="hint">Use negative for time savings</span>
+          </div>
+        </div>
+
+        <p class="form-section-title">Notes &amp; references</p>
+        <div class="form-grid">
+          <div class="form-group fg-full">
+            <label>Notes / reason for change</label>
+            <input type="text" id="f-notes" placeholder="e.g. Client changed mind after frame stage walk-through" />
+          </div>
+          <div class="form-group fg-full">
+            <label>Photo / document reference</label>
+            <input type="text" id="f-photo" placeholder="e.g. IMG_2045.jpg, variation-sketch-03.pdf" />
+            <span class="hint">Note any filenames or folder paths of supporting photos or documents</span>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+          <button class="btn btn-primary" onclick="addChange()"><i class="ti ti-device-floppy" style="vertical-align:-2px"></i> Save change</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="page" id="page-summary">
+      <div class="page-header">
+        <div><h1>Summary</h1><p>Totals across all changes</p></div>
+      </div>
+      <div class="metrics" id="summaryMetrics"></div>
+      <div class="breakdown-grid" id="breakdownGrid"></div>
+      <div id="summaryAlerts"></div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <span>Loading change register...</span>
+</div>
+
+<script>
+const API_KEY = '$2a$10$1EOxFnKlimGDUP1FjRPl1u3t4VDasPZtKvOTToVVPgBLFlMdvE53a';
+const BIN_NAME = 'sales-estimating-register';
+let BIN_ID = localStorage.getItem('jsonbin_id') || null;
+let changes = [];
+let nextId = 1;
+let selectedType = 'Plan A change';
+let activeStatusFilter = '';
+let saveTimer = null;
+
+async function loadData() {
+  try {
+    if (!BIN_ID) {
+      const res = await fetch('https://api.jsonbin.io/v3/b', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Name': BIN_NAME, 'X-Bin-Private': 'false' },
+        body: JSON.stringify({ changes: [], nextId: 1 })
+      });
+      const data = await res.json();
+      BIN_ID = data.metadata.id;
+      localStorage.setItem('jsonbin_id', BIN_ID);
+    }
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    const data = await res.json();
+    changes = data.record.changes || [];
+    nextId = data.record.nextId || (changes.length + 1);
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('error');
+    showToast('Could not connect to shared data store', true);
+  }
+  document.getElementById('loadingOverlay').style.display = 'none';
+  renderList();
+  renderSidebar();
+}
+
+async function saveData() {
+  setSyncStatus('syncing');
+  try {
+    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify({ changes, nextId })
+    });
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('error');
+    showToast('Save failed — check connection', true);
+  }
+}
+
+function debounceSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveData, 800);
+}
+
+function setSyncStatus(state) {
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'error' ? ' error' : '');
+  label.textContent = state === 'ok' ? 'Synced' : state === 'syncing' ? 'Saving...' : 'Offline';
+}
+
+function today() { return new Date().toISOString().split('T')[0]; }
+
+document.getElementById('f-date').value = today();
+
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const idx = ['register','add','summary'].indexOf(page);
+  document.querySelectorAll('.nav-btn')[idx]?.classList.add('active');
+  if (page === 'summary') renderSummary();
+  if (page === 'register') renderList();
+}
+
+function quickFilter(status) {
+  activeStatusFilter = status;
+  document.getElementById('filterStatus').value = status;
+  nav('register');
+  renderList();
+}
+
+function selectType(type) {
+  selectedType = type;
+  document.getElementById('type-plan').className = 'type-opt' + (type === 'Plan A change' ? ' sel-plan' : '');
+  document.getElementById('type-add').className = 'type-opt' + (type === 'Additional inclusion' ? ' sel-add' : '');
+}
+
+function addChange() {
+  const desc = document.getElementById('f-desc').value.trim();
+  if (!desc) { showToast('Please enter a description', true); return; }
+  changes.unshift({
+    id: nextId++,
+    type: selectedType,
+    desc,
+    client: document.getElementById('f-client').value.trim() || '—',
+    date: document.getElementById('f-date').value || today(),
+    requestedBy: document.getElementById('f-requestedby').value.trim(),
+    cost: parseFloat(document.getElementById('f-cost').value) || 0,
+    days: parseInt(document.getElementById('f-days').value) || 0,
+    notes: document.getElementById('f-notes').value.trim(),
+    photo: document.getElementById('f-photo').value.trim(),
+    status: document.getElementById('f-status').value
+  });
+  clearForm();
+  debounceSave();
+  showToast('Change logged');
+  nav('register');
+  renderList();
+  renderSidebar();
+}
+
+function clearForm() {
+  ['f-desc','f-client','f-requestedby','f-notes','f-photo'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-cost').value = '';
+  document.getElementById('f-days').value = '';
+  document.getElementById('f-date').value = today();
+  document.getElementById('f-status').value = 'Pending';
+  selectType('Plan A change');
+}
+
+function setStatus(id, status) {
+  const c = changes.find(x => x.id === id);
+  if (c) { c.status = status; renderList(); renderSidebar(); debounceSave(); }
+}
+
+function deleteChange(id) {
+  if (!confirm('Remove this change? This cannot be undone.')) return;
+  changes = changes.filter(x => x.id !== id);
+  renderList(); renderSidebar(); debounceSave();
+}
+
+function fmtCost(v) {
+  if (v === 0) return '—';
+  return (v > 0 ? '+' : '') + '$' + Math.abs(v).toLocaleString('en-AU', {minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+function statusBadge(s) {
+  const map = { Pending:'badge-pending', Approved:'badge-approved', Rejected:'badge-rejected', Queried:'badge-queried' };
+  return `<span class="badge ${map[s]||''}">${s}</span>`;
+}
+
+function renderList() {
+  const typeF = document.getElementById('filterType').value;
+  const statusF = document.getElementById('filterStatus').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let list = changes.filter(c =>
+    (!typeF || c.type === typeF) &&
+    (!statusF || c.status === statusF) &&
+    (!search || c.desc.toLowerCase().includes(search) || c.client.toLowerCase().includes(search))
+  );
+  const sub = list.length + ' change' + (list.length !== 1 ? 's' : '');
+  document.getElementById('registerSubtitle').textContent = sub;
+  const el = document.getElementById('changesList');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><i class="ti ti-clipboard-list"></i><p>No changes match your filters.</p></div>`;
+    return;
+  }
+  el.innerHTML = list.map(c => `
+    <div class="change-card ${c.type === 'Plan A change' ? 'plan-border' : 'add-border'}">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="cr-num">CR-${String(c.id).padStart(4,'0')}</span>
+          <span class="badge ${c.type === 'Plan A change' ? 'badge-plan' : 'badge-add'}">${c.type === 'Plan A change' ? 'Plan A change' : 'Post-prelim addition'}</span>
+          ${statusBadge(c.status)}
+        </div>
+        <div class="card-actions">
+          ${c.status !== 'Approved' ? `<button class="act-btn approve" onclick="setStatus(${c.id},'Approved')"><i class="ti ti-check"></i> Approve</button>` : ''}
+          ${c.status !== 'Rejected' ? `<button class="act-btn reject" onclick="setStatus(${c.id},'Rejected')"><i class="ti ti-x"></i> Reject</button>` : ''}
+          ${c.status === 'Pending' ? `<button class="act-btn" onclick="setStatus(${c.id},'Queried')"><i class="ti ti-help-circle"></i> Query</button>` : ''}
+          <button class="act-btn del" onclick="deleteChange(${c.id})" aria-label="Delete"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+      <div class="card-desc">${c.desc}</div>
+      <div class="card-grid">
+        <div class="card-field"><span class="cf-label">Client / project</span><span class="cf-val">${c.client}</span></div>
+        <div class="card-field"><span class="cf-label">Date</span><span class="cf-val">${fmtDate(c.date)}</span></div>
+        ${c.requestedBy ? `<div class="card-field"><span class="cf-label">Requested by</span><span class="cf-val">${c.requestedBy}</span></div>` : ''}
+        <div class="card-field"><span class="cf-label">Cost impact</span><span class="cf-val cost">${fmtCost(c.cost)}</span></div>
+        <div class="card-field"><span class="cf-label">Schedule impact</span><span class="cf-val time">${c.days ? (c.days > 0 ? '+' : '') + c.days + ' days' : '—'}</span></div>
+        ${c.photo ? `<div class="card-field"><span class="cf-label">Photo / doc ref</span><span class="cf-val">${c.photo}</span></div>` : ''}
+      </div>
+      ${c.notes ? `<div class="card-notes"><i class="ti ti-note" style="vertical-align:-2px;margin-right:4px"></i>${c.notes}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderSidebar() {
+  const pending = changes.filter(c => c.status === 'Pending').length;
+  const totalCost = changes.filter(c => c.status !== 'Rejected').reduce((s,c) => s+c.cost, 0);
+  document.getElementById('sidebarStats').innerHTML = `
+    <div class="stat-pill"><div class="stat-pill-label">Pending approval</div><div class="stat-pill-val" style="color:var(--warning)">${pending}</div></div>
+    <div class="stat-pill"><div class="stat-pill-label">Total cost impact</div><div class="stat-pill-val">${totalCost >= 0 ? '+' : ''}$${Math.abs(totalCost).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
+  `;
+}
+
+function renderSummary() {
+  const total = changes.length;
+  const approved = changes.filter(c => c.status === 'Approved').length;
+  const pending = changes.filter(c => c.status === 'Pending').length;
+  const totalCost = changes.filter(c => c.status !== 'Rejected').reduce((s,c) => s+c.cost, 0);
+  const totalDays = changes.filter(c => c.status !== 'Rejected').reduce((s,c) => s+c.days, 0);
+  document.getElementById('summaryMetrics').innerHTML = `
+    <div class="metric-card accent"><div class="mc-label">Total changes</div><div class="mc-val">${total}</div><div class="mc-sub">${approved} approved</div></div>
+    <div class="metric-card"><div class="mc-label">Pending approval</div><div class="mc-val amber">${pending}</div><div class="mc-sub">awaiting decision</div></div>
+    <div class="metric-card"><div class="mc-label">Cost impact</div><div class="mc-val green">${totalCost >= 0 ? '+' : ''}$${Math.abs(totalCost).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="mc-sub">exc. rejected</div></div>
+    <div class="metric-card"><div class="mc-label">Schedule impact</div><div class="mc-val amber">${totalDays > 0 ? '+' : ''}${totalDays} days</div><div class="mc-sub">exc. rejected</div></div>
+  `;
+  const planA = changes.filter(c => c.type === 'Plan A change');
+  const addl = changes.filter(c => c.type === 'Additional inclusion');
+  const bc = (list, label, badgeCls) => `
+    <div class="breakdown-card">
+      <div class="bc-title"><span class="badge ${badgeCls}">${label}</span></div>
+      <div class="bc-row"><span class="bc-row-label">Total</span><span class="bc-row-val">${list.length}</span></div>
+      <div class="bc-row"><span class="bc-row-label">Approved</span><span class="bc-row-val" style="color:var(--success)">${list.filter(c=>c.status==='Approved').length}</span></div>
+      <div class="bc-row"><span class="bc-row-label">Pending</span><span class="bc-row-val" style="color:var(--warning)">${list.filter(c=>c.status==='Pending').length}</span></div>
+      <div class="bc-row"><span class="bc-row-label">Rejected</span><span class="bc-row-val" style="color:var(--danger)">${list.filter(c=>c.status==='Rejected').length}</span></div>
+      <div class="bc-row"><span class="bc-row-label">Cost impact</span><span class="bc-row-val">${fmtCost(list.reduce((s,c)=>s+c.cost,0))}</span></div>
+      <div class="bc-row"><span class="bc-row-label">Schedule impact</span><span class="bc-row-val">${list.reduce((s,c)=>s+c.days,0)} days</span></div>
+    </div>`;
+  document.getElementById('breakdownGrid').innerHTML = bc(planA,'Plan A changes','badge-plan') + bc(addl,'Post-prelim additions','badge-add');
+  let alerts = '';
+  if (pending > 0) alerts += `<div class="alert-box alert-warning" style="margin-top:14px"><i class="ti ti-alert-triangle" style="font-size:18px"></i> ${pending} change${pending>1?'s':''} still awaiting approval.</div>`;
+  if (totalDays > 5) alerts += `<div class="alert-box alert-warning" style="margin-top:10px"><i class="ti ti-clock" style="font-size:18px"></i> Total schedule exposure is <strong>${totalDays} days</strong> — flag with project manager.</div>`;
+  document.getElementById('summaryAlerts').innerHTML = alerts;
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+loadData();
+</script>
+</body>
+</html>
