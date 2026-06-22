@@ -349,7 +349,7 @@
   <div class="page" id="page-add">
     <div class="breadcrumb"><a onclick="goToJob()"><i class="ti ti-arrow-left"></i> Back to <span id="addBackJobName"></span></a></div>
     <div class="page-header">
-      <div><h1>Log a change</h1><p>Record a plan change or post-prelim additional item</p></div>
+      <div><h1 id="formPageTitle">Log a change</h1><p id="formPageSub">Record a plan change or post-prelim additional item</p></div>
     </div>
     <div class="form-card">
       <p class="form-section-title">Change type</p>
@@ -431,8 +431,8 @@
       </div>
 
       <div class="form-footer">
-        <button class="btn btn-ghost" onclick="goToJob()">Cancel</button>
-        <button class="btn btn-primary" onclick="addChange()"><i class="ti ti-device-floppy"></i> Save change</button>
+        <button class="btn btn-ghost" onclick="editingChangeId=null; goToJob()">Cancel</button>
+        <button class="btn btn-primary" id="saveChangeBtn" onclick="addChange()"><i class="ti ti-device-floppy"></i> Save change</button>
       </div>
     </div>
   </div>
@@ -500,6 +500,7 @@ let saveTimer = null;
 let formItems = []; // working items for the add-change form
 let nextItemRowId = 1;
 let emailTargetChangeId = null;
+let editingChangeId = null; // null = adding new, otherwise id of change being edited
 
 async function loadData() {
   try {
@@ -565,7 +566,42 @@ function openJob(jobId) { activeJobId = jobId; showPage('page-job'); jobTab('reg
 function openAddForm() {
   const job = jobs.find(j => j.id === activeJobId);
   document.getElementById('addBackJobName').textContent = job ? job.name : '';
+  editingChangeId = null;
   clearForm();
+  document.getElementById('formPageTitle').textContent = 'Log a change';
+  document.getElementById('formPageSub').textContent = 'Record a plan change or post-prelim additional item';
+  document.getElementById('saveChangeBtn').innerHTML = '<i class="ti ti-device-floppy"></i> Save change';
+  showPage('page-add');
+}
+
+function openEditForm(changeId) {
+  const c = changes.find(x => x.id === changeId);
+  if (!c) return;
+  const job = jobs.find(j => j.id === c.jobId);
+  document.getElementById('addBackJobName').textContent = job ? job.name : '';
+  editingChangeId = changeId;
+
+  selectType(c.type);
+  document.getElementById('f-desc').value = c.desc || '';
+  document.getElementById('f-date').value = c.date || today();
+  document.getElementById('f-requestedby').value = c.requestedBy || '';
+  document.getElementById('f-status').value = c.status || 'Pending';
+  document.getElementById('f-markup-material').value = c.markupMaterial || 0;
+  document.getElementById('f-markup-labour').value = c.markupLabour || 0;
+  document.getElementById('f-gst').value = (c.gst === undefined || c.gst === null) ? 10 : c.gst;
+  document.getElementById('f-days').value = c.days || '';
+  document.getElementById('f-notes').value = c.notes || '';
+  document.getElementById('f-photo').value = c.photo || '';
+
+  formItems = (c.items || []).map(i => ({...i}));
+  // make sure future item rows don't collide with existing ids
+  const maxId = formItems.reduce((m,i) => Math.max(m, i.id), 0);
+  nextItemRowId = Math.max(nextItemRowId, maxId + 1);
+  renderItemRows();
+
+  document.getElementById('formPageTitle').textContent = 'Edit change';
+  document.getElementById('formPageSub').textContent = `Editing CR-${String(c.id).padStart(4,'0')}`;
+  document.getElementById('saveChangeBtn').innerHTML = '<i class="ti ti-device-floppy"></i> Save edits';
   showPage('page-add');
 }
 
@@ -747,9 +783,7 @@ function selectType(type) {
 function addChange() {
   const desc = document.getElementById('f-desc').value.trim();
   if (!desc) { showToast('Please enter a description', true); return; }
-  changes.unshift({
-    id: nextChangeId++,
-    jobId: activeJobId,
+  const payload = {
     type: selectedType,
     desc,
     date: document.getElementById('f-date').value || today(),
@@ -762,10 +796,22 @@ function addChange() {
     notes: document.getElementById('f-notes').value.trim(),
     photo: document.getElementById('f-photo').value.trim(),
     status: document.getElementById('f-status').value
-  });
+  };
+
+  if (editingChangeId !== null) {
+    const idx = changes.findIndex(x => x.id === editingChangeId);
+    if (idx !== -1) {
+      changes[idx] = { ...changes[idx], ...payload };
+    }
+    showToast('Change updated');
+  } else {
+    changes.unshift({ id: nextChangeId++, jobId: activeJobId, ...payload });
+    showToast('Change logged');
+  }
+
+  editingChangeId = null;
   clearForm();
   debounceSave();
-  showToast('Change logged');
   goToJob();
 }
 
@@ -840,6 +886,7 @@ function renderList() {
           ${c.status !== 'Approved' ? `<button class="act-btn approve" onclick="setStatus(${c.id},'Approved')"><i class="ti ti-check"></i> Approve</button>` : ''}
           ${c.status !== 'Rejected' ? `<button class="act-btn reject" onclick="setStatus(${c.id},'Rejected')"><i class="ti ti-x"></i> Reject</button>` : ''}
           ${c.status === 'Pending' ? `<button class="act-btn" onclick="setStatus(${c.id},'Queried')"><i class="ti ti-help-circle"></i> Query</button>` : ''}
+          <button class="act-btn" onclick="openEditForm(${c.id})"><i class="ti ti-pencil"></i> Edit</button>
           <button class="act-btn email" onclick="openEmailModal(${c.id})"><i class="ti ti-mail"></i> Email client</button>
           <button class="act-btn del" onclick="deleteChange(${c.id})" aria-label="Delete"><i class="ti ti-trash"></i></button>
         </div>
