@@ -154,6 +154,10 @@
   .filter-bar select, .filter-bar input[type=text] { font-size: 13px; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); }
   .filter-bar input[type=text] { min-width: 200px; }
 
+  .changes-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  .changes-column-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+  .changes-column-header h3 { font-size: 14px; font-weight: 700; color: var(--text); }
+  .changes-column-count { font-size: 12px; color: var(--text3); font-weight: 600; background: var(--surface2); padding: 2px 9px; border-radius: 100px; }
   .changes-list { display: flex; flex-direction: column; gap: 10px; }
   .change-card {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
@@ -162,6 +166,10 @@
   .change-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
   .change-card.plan-border { border-left: 3px solid var(--plan-border); }
   .change-card.add-border { border-left: 3px solid var(--add-border); }
+  .change-card.status-pending { background: var(--warning-bg); border-color: #E8C070; }
+  .change-card.status-approved { background: var(--success-bg); border-color: #8FBFAA; }
+  .change-card.status-rejected { background: var(--danger-bg); border-color: #E0A0A0; }
+  .change-card.status-queried { background: var(--queried-bg); border-color: #C5C0EE; }
   .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
   .card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .cr-num { font-size: 12px; font-weight: 700; color: var(--text3); font-variant-numeric: tabular-nums; }
@@ -171,6 +179,19 @@
   .badge-pending { background: var(--warning-bg); color: var(--warning); }
   .badge-approved { background: var(--success-bg); color: var(--success); }
   .badge-rejected { background: var(--danger-bg); color: var(--danger); }
+  .pack-tag-row { margin-bottom: 8px; }
+  .pack-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; background: var(--brand-light); color: var(--brand); padding: 4px 10px; border-radius: 100px; cursor: pointer; }
+  .pack-tag:hover { background: var(--brand-mid); color: #fff; }
+  .pack-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; background: var(--brand-light); color: var(--brand); padding: 7px 14px; border-radius: var(--radius); margin-bottom: 1rem; }
+  .pack-chip button { background: none; border: none; color: var(--brand); cursor: pointer; display: flex; align-items: center; }
+  .pack-chip button:hover { color: var(--danger); }
+
+  .pack-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--brand-mid); border-radius: var(--radius-lg); padding: 1rem 1.25rem; box-shadow: var(--shadow); }
+  .pack-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .pack-card-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .pack-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-top: 8px; }
+  .pack-view-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: none; font-size: 12px; font-weight: 600; color: var(--text2); cursor: pointer; }
+  .pack-view-btn:hover { background: var(--surface2); }
   .badge-queried { background: var(--queried-bg); color: var(--queried-text); }
   .card-desc { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
   .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 8px; }
@@ -253,6 +274,22 @@
   .act-btn.email { border-color: var(--brand-mid); color: var(--brand-mid); }
   .act-btn.email:hover { background: var(--brand-light); }
 
+  .change-card.selected { border-color: var(--brand-mid); box-shadow: 0 0 0 2px rgba(45,106,79,0.15); }
+  .card-checkbox { display: flex; align-items: flex-start; gap: 10px; }
+  .card-checkbox input[type=checkbox] { width: 18px; height: 18px; margin-top: 2px; cursor: pointer; accent-color: var(--brand-mid); flex-shrink: 0; }
+  .bulk-bar {
+    position: sticky; top: 66px; z-index: 50; background: var(--brand); color: #fff; border-radius: var(--radius-lg);
+    padding: 10px 16px; margin-bottom: 1rem; display: none; align-items: center; justify-content: space-between; gap: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  }
+  .bulk-bar.show { display: flex; }
+  .bulk-bar-left { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .bulk-bar button { padding: 7px 16px; border: none; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .bulk-bar .bulk-email-btn { background: #fff; color: var(--brand); }
+  .bulk-bar .bulk-email-btn:hover { background: var(--brand-light); }
+  .bulk-bar .bulk-clear-btn { background: rgba(255,255,255,0.15); color: #fff; }
+  .bulk-bar .bulk-clear-btn:hover { background: rgba(255,255,255,0.25); }
+
   .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text3); }
   .empty-state i { font-size: 48px; opacity: 0.25; display: block; margin-bottom: 12px; }
   .empty-state p { font-size: 14px; }
@@ -271,6 +308,7 @@
     .form-grid { grid-template-columns: 1fr; }
     .breakdown-grid { grid-template-columns: 1fr; }
     .jobs-grid { grid-template-columns: 1fr; }
+    .changes-columns { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -315,6 +353,7 @@
 
     <div class="tabs-row">
       <button class="tab-btn active" id="jt-register" onclick="jobTab('register')">Change register</button>
+      <button class="tab-btn" id="jt-packs" onclick="jobTab('packs')">Variation packs</button>
       <button class="tab-btn" id="jt-summary" onclick="jobTab('summary')">Summary</button>
     </div>
 
@@ -334,8 +373,48 @@
           <option value="Queried">Queried</option>
           <option value="Rejected">Rejected</option>
         </select>
+        <select id="filterPack" onchange="filterByPack(this.value ? parseInt(this.value) : null)">
+          <option value="">All packs</option>
+        </select>
       </div>
-      <div class="changes-list" id="changesList"></div>
+      <div id="packFilterChip"></div>
+      <div class="bulk-bar" id="bulkBar">
+        <div class="bulk-bar-left"><i class="ti ti-square-check"></i> <span id="bulkCount">0</span> selected</div>
+        <div style="display:flex;gap:8px">
+          <button class="bulk-clear-btn" onclick="clearSelection()">Clear</button>
+          <button class="bulk-email-btn" onclick="openBulkEmailModal()"><i class="ti ti-mail" style="vertical-align:-2px;margin-right:4px"></i> Email selected</button>
+        </div>
+      </div>
+      <div class="changes-columns">
+        <div>
+          <div class="changes-column-header">
+            <span class="badge badge-plan">Plan A changes</span>
+            <span class="changes-column-count" id="planColumnCount">0</span>
+          </div>
+          <div class="changes-list" id="changesListPlan"></div>
+        </div>
+        <div>
+          <div class="changes-column-header">
+            <span class="badge badge-add">Post-prelim additions</span>
+            <span class="changes-column-count" id="addColumnCount">0</span>
+          </div>
+          <div class="changes-list" id="changesListAdd"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- packs tab -->
+    <div id="jobtab-packs" style="display:none">
+      <div class="filter-bar">
+        <select id="packStatusFilter" onchange="renderPacksList()">
+          <option value="">All pack statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="Partially approved">Partially approved</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="changes-list" id="packsList"></div>
     </div>
 
     <!-- summary tab -->
@@ -491,9 +570,11 @@ const BIN_NAME = 'sales-estimating-register';
 let BIN_ID = localStorage.getItem('jsonbin_id') || null;
 
 let jobs = [];        // { id, name, ref, archived }
-let changes = [];      // { id, jobId, type, desc, date, requestedBy, items:[{id,kind,desc,qty,unitPrice}], markupMaterial, markupLabour, gst, days, notes, photo, status }
+let changes = [];      // { id, jobId, packId, type, desc, date, requestedBy, items:[{id,kind,desc,qty,unitPrice}], markupMaterial, markupLabour, gst, days, notes, photo, status }
+let packs = [];        // { id, jobId, packNumber, sentDate, clientEmail }
 let nextJobId = 1;
 let nextChangeId = 1;
+let nextPackId = 1;
 let activeJobId = null;
 let selectedType = 'Plan A change';
 let saveTimer = null;
@@ -501,6 +582,8 @@ let formItems = []; // working items for the add-change form
 let nextItemRowId = 1;
 let emailTargetChangeId = null;
 let editingChangeId = null; // null = adding new, otherwise id of change being edited
+let selectedChangeIds = new Set();
+let packFilterId = null; // when set, register view is filtered to one pack
 
 async function loadData() {
   try {
@@ -508,7 +591,7 @@ async function loadData() {
       const res = await fetch('https://api.jsonbin.io/v3/b', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Name': BIN_NAME, 'X-Bin-Private': 'false' },
-        body: JSON.stringify({ jobs: [], changes: [], nextJobId: 1, nextChangeId: 1 })
+        body: JSON.stringify({ jobs: [], changes: [], packs: [], nextJobId: 1, nextChangeId: 1, nextPackId: 1 })
       });
       const data = await res.json();
       BIN_ID = data.metadata.id;
@@ -518,8 +601,10 @@ async function loadData() {
     const data = await res.json();
     jobs = data.record.jobs || [];
     changes = data.record.changes || [];
+    packs = data.record.packs || [];
     nextJobId = data.record.nextJobId || (jobs.length + 1);
     nextChangeId = data.record.nextChangeId || (changes.length + 1);
+    nextPackId = data.record.nextPackId || (packs.length + 1);
     setSyncStatus('ok');
   } catch(e) {
     setSyncStatus('error');
@@ -535,7 +620,7 @@ async function saveData() {
     await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-      body: JSON.stringify({ jobs, changes, nextJobId, nextChangeId })
+      body: JSON.stringify({ jobs, changes, packs, nextJobId, nextChangeId, nextPackId })
     });
     setSyncStatus('ok');
   } catch(e) {
@@ -675,11 +760,14 @@ function renderJobs() {
 /* ---------- job detail ---------- */
 function jobTab(tab) {
   document.getElementById('jt-register').classList.toggle('active', tab === 'register');
+  document.getElementById('jt-packs').classList.toggle('active', tab === 'packs');
   document.getElementById('jt-summary').classList.toggle('active', tab === 'summary');
   document.getElementById('jobtab-register').style.display = tab === 'register' ? '' : 'none';
+  document.getElementById('jobtab-packs').style.display = tab === 'packs' ? '' : 'none';
   document.getElementById('jobtab-summary').style.display = tab === 'summary' ? '' : 'none';
   if (tab === 'summary') renderJobSummary();
   if (tab === 'register') renderList();
+  if (tab === 'packs') renderPacksList();
 }
 
 function renderJobDetail() {
@@ -859,27 +947,20 @@ function statusBadge(s) {
   return `<span class="badge ${map[s]||''}">${s}</span>`;
 }
 
-function renderList() {
-  const typeF = document.getElementById('filterType').value;
-  const statusF = document.getElementById('filterStatus').value;
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  let list = changes.filter(c =>
-    c.jobId === activeJobId &&
-    (!typeF || c.type === typeF) &&
-    (!statusF || c.status === statusF) &&
-    (!search || c.desc.toLowerCase().includes(search))
-  );
-  const el = document.getElementById('changesList');
-  if (!list.length) {
-    el.innerHTML = `<div class="empty-state"><i class="ti ti-clipboard-list"></i><p>No changes logged for this job yet.</p></div>`;
-    return;
-  }
-  el.innerHTML = list.map(c => `
-    <div class="change-card ${c.type === 'Plan A change' ? 'plan-border' : 'add-border'}">
+function statusClass(status) {
+  return { Pending: 'status-pending', Approved: 'status-approved', Rejected: 'status-rejected', Queried: 'status-queried' }[status] || '';
+}
+
+function buildChangeCard(c) {
+  return `
+    <div class="change-card ${c.type === 'Plan A change' ? 'plan-border' : 'add-border'} ${statusClass(c.status)} ${selectedChangeIds.has(c.id) ? 'selected' : ''}">
+      ${c.packId ? `<div class="pack-tag-row"><span class="pack-tag" onclick="filterByPack(${c.packId})"><i class="ti ti-package"></i> Pack ${packs.find(p=>p.id===c.packId)?.packNumber || '?'}</span></div>` : ''}
+      <div class="card-checkbox">
+        <input type="checkbox" ${selectedChangeIds.has(c.id) ? 'checked' : ''} onchange="toggleSelect(${c.id})" aria-label="Select change for bulk email" />
+        <div style="flex:1">
       <div class="card-top">
         <div class="card-meta">
           <span class="cr-num">CR-${String(c.id).padStart(4,'0')}</span>
-          <span class="badge ${c.type === 'Plan A change' ? 'badge-plan' : 'badge-add'}">${c.type === 'Plan A change' ? 'Plan A change' : 'Post-prelim addition'}</span>
           ${statusBadge(c.status)}
         </div>
         <div class="card-actions">
@@ -901,8 +982,92 @@ function renderList() {
       </div>
       ${c.items && c.items.length ? `<div class="card-notes"><i class="ti ti-list" style="vertical-align:-2px;margin-right:4px"></i>${c.items.length} item${c.items.length>1?'s':''} (${c.items.filter(i=>i.kind==='Material').length} material, ${c.items.filter(i=>i.kind==='Labour').length} labour)</div>` : ''}
       ${c.notes ? `<div class="card-notes"><i class="ti ti-note" style="vertical-align:-2px;margin-right:4px"></i>${c.notes}</div>` : ''}
+        </div>
+      </div>
     </div>
-  `).join('');
+  `;
+}
+
+function renderList() {
+  const typeF = document.getElementById('filterType').value;
+  const statusF = document.getElementById('filterStatus').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+
+  // populate pack filter dropdown for this job
+  const jobPacks = packs.filter(p => p.jobId === activeJobId).sort((a,b) => a.packNumber - b.packNumber);
+  const packSelect = document.getElementById('filterPack');
+  const currentVal = packFilterId !== null ? String(packFilterId) : '';
+  packSelect.innerHTML = `<option value="">All packs</option>` + jobPacks.map(p => `<option value="${p.id}">Pack ${p.packNumber}</option>`).join('');
+  packSelect.value = currentVal;
+
+  // active pack filter chip
+  const chipEl = document.getElementById('packFilterChip');
+  if (packFilterId !== null) {
+    const p = jobPacks.find(pk => pk.id === packFilterId);
+    chipEl.innerHTML = p ? `<div class="pack-chip">Showing only <strong>Pack ${p.packNumber}</strong> <button onclick="clearPackFilter()"><i class="ti ti-x"></i></button></div>` : '';
+  } else {
+    chipEl.innerHTML = '';
+  }
+
+  let list = changes.filter(c =>
+    c.jobId === activeJobId &&
+    (!typeF || c.type === typeF) &&
+    (!statusF || c.status === statusF) &&
+    (packFilterId === null || c.packId === packFilterId) &&
+    (!search || c.desc.toLowerCase().includes(search))
+  );
+  updateBulkBar();
+
+  const planList = list.filter(c => c.type === 'Plan A change');
+  const addList = list.filter(c => c.type === 'Additional inclusion');
+
+  document.getElementById('planColumnCount').textContent = planList.length;
+  document.getElementById('addColumnCount').textContent = addList.length;
+
+  const planEl = document.getElementById('changesListPlan');
+  const addEl = document.getElementById('changesListAdd');
+
+  planEl.innerHTML = planList.length
+    ? planList.map(buildChangeCard).join('')
+    : `<div class="empty-state"><i class="ti ti-versions"></i><p>No plan A changes logged yet.</p></div>`;
+
+  addEl.innerHTML = addList.length
+    ? addList.map(buildChangeCard).join('')
+    : `<div class="empty-state"><i class="ti ti-circle-plus"></i><p>No post-prelim additions logged yet.</p></div>`;
+}
+
+function renderPacksList() {
+  const statusF = document.getElementById('packStatusFilter').value;
+  let list = packs.filter(p => p.jobId === activeJobId);
+  list = list.filter(p => !statusF || packStatus(p.id) === statusF);
+  list.sort((a,b) => b.packNumber - a.packNumber);
+
+  const el = document.getElementById('packsList');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><i class="ti ti-package"></i><p>No variation packs sent for this job yet. Select changes in the register and click "Email selected" to create one.</p></div>`;
+    return;
+  }
+  el.innerHTML = list.map(p => {
+    const status = packStatus(p.id);
+    const items = changes.filter(c => c.packId === p.id);
+    const total = packTotal(p.id);
+    const approved = items.filter(c => c.status === 'Approved').length;
+    const rejected = items.filter(c => c.status === 'Rejected').length;
+    const pending = items.filter(c => c.status === 'Pending' || c.status === 'Queried').length;
+    return `
+    <div class="pack-card">
+      <div class="pack-card-top">
+        <div class="pack-card-title"><i class="ti ti-package"></i> Pack ${p.packNumber} <span class="badge ${packBadgeClass(status)}">${status}</span></div>
+        <button class="pack-view-btn" onclick="filterByPack(${p.id})"><i class="ti ti-eye" style="vertical-align:-2px;margin-right:4px"></i> View items</button>
+      </div>
+      <div class="pack-card-grid">
+        <div class="card-field"><span class="cf-label">Sent</span><span class="cf-val">${fmtDate(p.sentDate)}</span></div>
+        <div class="card-field"><span class="cf-label">Sent to</span><span class="cf-val">${p.clientEmail || '—'}</span></div>
+        <div class="card-field"><span class="cf-label">Items</span><span class="cf-val">${items.length} (${approved} approved, ${rejected} rejected, ${pending} pending)</span></div>
+        <div class="card-field"><span class="cf-label">Total (exc. rejected)</span><span class="cf-val cost">${fmtCost(total)}</span></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderJobSummary() {
@@ -936,30 +1101,118 @@ function showToast(msg, isError = false) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+/* ---------- packs ---------- */
+function nextPackNumberForJob(jobId) {
+  const jobPacks = packs.filter(p => p.jobId === jobId);
+  return jobPacks.length ? Math.max(...jobPacks.map(p => p.packNumber)) + 1 : 1;
+}
+function packStatus(packId) {
+  const list = changes.filter(c => c.packId === packId);
+  if (!list.length) return 'Pending';
+  const allApproved = list.every(c => c.status === 'Approved');
+  const allRejected = list.every(c => c.status === 'Rejected');
+  const anyDecided = list.some(c => c.status === 'Approved' || c.status === 'Rejected');
+  if (allApproved) return 'Approved';
+  if (allRejected) return 'Rejected';
+  if (anyDecided) return 'Partially approved';
+  return 'Pending';
+}
+function packBadgeClass(status) {
+  return { Pending: 'badge-pending', Approved: 'badge-approved', Rejected: 'badge-rejected', 'Partially approved': 'badge-queried' }[status] || 'badge-pending';
+}
+function packTotal(packId) {
+  return changes.filter(c => c.packId === packId && c.status !== 'Rejected').reduce((s,c) => s + changeTotal(c), 0);
+}
+
+function filterByPack(packId) {
+  packFilterId = packId;
+  jobTab('register');
+  renderList();
+}
+function clearPackFilter() {
+  packFilterId = null;
+  renderList();
+}
+
+/* ---------- selection for bulk email ---------- */
+function toggleSelect(id) {
+  if (selectedChangeIds.has(id)) selectedChangeIds.delete(id);
+  else selectedChangeIds.add(id);
+  updateBulkBar();
+  renderList();
+}
+function clearSelection() {
+  selectedChangeIds.clear();
+  renderList();
+}
+function updateBulkBar() {
+  const bar = document.getElementById('bulkBar');
+  const count = selectedChangeIds.size;
+  document.getElementById('bulkCount').textContent = count;
+  bar.classList.toggle('show', count > 0);
+}
+
 /* ---------- email ---------- */
 function openEmailModal(changeId) {
   const c = changes.find(x => x.id === changeId);
   const job = jobs.find(j => j.id === c.jobId);
   if (!c || !job) return;
   emailTargetChangeId = changeId;
+  pendingBulkChangeIds = null;
   const total = changeTotal(c);
   const typeLabel = c.type === 'Plan A change' ? 'plan change' : 'additional inclusion';
 
   document.getElementById('emailTo').value = '';
   document.getElementById('emailSubject').value = `Variation notice — ${job.name} — CR-${String(c.id).padStart(4,'0')}`;
   document.getElementById('emailBody').value =
-`Hi,
+`VARIATION NOTICE
 
-We're writing to confirm a ${typeLabel} for your project at ${job.name}.
+Project: ${job.name}
+Date: ${fmtDate(today())}
 
-Description of change:
-${c.desc}
+The following variation captures a ${typeLabel} for your project. All prices are inclusive of GST.
 
-${c.days ? `This change is expected to impact the build schedule by ${c.days > 0 ? '+' : ''}${c.days} day${Math.abs(c.days) !== 1 ? 's' : ''}.\n\n` : ''}Variation amount (inc. GST): $${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}
+1. ${c.desc}
+${c.days ? `   Schedule impact: ${c.days > 0 ? '+' : ''}${c.days} day${Math.abs(c.days) !== 1 ? 's' : ''}\n` : ''}   Amount (incl. GST): $${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}
 
-Please reply to this email or contact us to confirm you're happy to proceed, and we'll formalise the variation.
+TOTAL ADDITIONAL COST (incl. GST): $${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}
+
+Please reply to this email or sign and return to confirm your acceptance of this variation.
 
 Kind regards,`;
+
+  document.getElementById('emailModal').classList.add('show');
+  setTimeout(() => document.getElementById('emailTo').focus(), 50);
+}
+
+let pendingBulkChangeIds = null;
+
+function openBulkEmailModal() {
+  if (!selectedChangeIds.size) return;
+  const job = jobs.find(j => j.id === activeJobId);
+  if (!job) return;
+
+  const list = changes.filter(c => selectedChangeIds.has(c.id));
+  emailTargetChangeId = null; // bulk mode
+  pendingBulkChangeIds = [...selectedChangeIds];
+  const packNum = nextPackNumberForJob(activeJobId);
+
+  let body = `VARIATION NOTICE — PACK ${packNum}\n\nProject: ${job.name}\nDate: ${fmtDate(today())}\n\nThe following variations capture additional works and changes agreed for your project. All prices are inclusive of GST.\n\n`;
+
+  let grandTotal = 0;
+  list.forEach((c, idx) => {
+    const total = changeTotal(c);
+    grandTotal += total;
+    body += `${idx + 1}. ${c.desc}\n`;
+    if (c.days) body += `   Schedule impact: ${c.days > 0 ? '+' : ''}${c.days} day${Math.abs(c.days) !== 1 ? 's' : ''}\n`;
+    body += `   Amount (incl. GST): $${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}\n\n`;
+  });
+
+  body += `TOTAL ADDITIONAL COST (incl. GST): $${grandTotal.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}\n\nPlease reply to this email or sign and return to confirm your acceptance of these variations.\n\nKind regards,`;
+
+  document.getElementById('emailTo').value = '';
+  document.getElementById('emailSubject').value = `Variation notice — ${job.name} — Pack ${packNum}`;
+  document.getElementById('emailBody').value = body;
 
   document.getElementById('emailModal').classList.add('show');
   setTimeout(() => document.getElementById('emailTo').focus(), 50);
@@ -968,6 +1221,7 @@ Kind regards,`;
 function closeEmailModal() {
   document.getElementById('emailModal').classList.remove('show');
   emailTargetChangeId = null;
+  pendingBulkChangeIds = null;
 }
 
 function sendEmail() {
@@ -976,6 +1230,21 @@ function sendEmail() {
   const subject = document.getElementById('emailSubject').value;
   const body = document.getElementById('emailBody').value;
   const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  // If this was a bulk send, create the pack and assign selected changes to it
+  if (pendingBulkChangeIds && pendingBulkChangeIds.length) {
+    const packNum = nextPackNumberForJob(activeJobId);
+    const pack = { id: nextPackId++, jobId: activeJobId, packNumber: packNum, sentDate: today(), clientEmail: to };
+    packs.unshift(pack);
+    pendingBulkChangeIds.forEach(id => {
+      const c = changes.find(x => x.id === id);
+      if (c) c.packId = pack.id;
+    });
+    showToast(`Pack ${packNum} sent`);
+    clearSelection();
+    debounceSave();
+  }
+
   window.location.href = mailto;
   closeEmailModal();
 }
