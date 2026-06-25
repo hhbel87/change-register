@@ -179,6 +179,8 @@
   .badge-pending { background: var(--warning-bg); color: var(--warning); }
   .badge-approved { background: var(--success-bg); color: var(--success); }
   .badge-rejected { background: var(--danger-bg); color: var(--danger); }
+  .report-panels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+  .report-panels-grid .approved-report-card { margin-top: 0; }
   .approved-report-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 14px; }
   .approved-report-head { font-size: 14px; margin-bottom: 12px; color: var(--text); }
   .approved-report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; }
@@ -327,6 +329,7 @@
     .breakdown-grid { grid-template-columns: 1fr; }
     .jobs-grid { grid-template-columns: 1fr; }
     .changes-columns { grid-template-columns: 1fr; }
+    .report-panels-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -1129,9 +1132,29 @@ function renderJobSummary() {
   document.getElementById('breakdownGrid').innerHTML = bc(planA,'Plan A changes','badge-plan') + bc(addl,'Post-prelim additions','badge-add');
 
   const approvedList = list.filter(c => c.status === 'Approved');
-  const approvedCost = approvedList.reduce((s,c) => s+changeCost(c), 0);
-  const approvedProfit = approvedList.reduce((s,c) => s+changeProfit(c), 0);
-  const approvedTotal = approvedList.reduce((s,c) => s+changeTotal(c), 0);
+  const approvedPlanA = approvedList.filter(c => c.type === 'Plan A change');
+  const approvedAddl = approvedList.filter(c => c.type === 'Additional inclusion');
+
+  const reportPanel = (items, label, icon, downloadArg) => {
+    const cost = items.reduce((s,c) => s+changeCost(c), 0);
+    const profit = items.reduce((s,c) => s+changeProfit(c), 0);
+    const total = items.reduce((s,c) => s+changeTotal(c), 0);
+    return `
+    <div class="approved-report-card">
+      <div class="approved-report-head">
+        <div><i class="ti ${icon}" style="margin-right:6px"></i><strong>${label} report — internal</strong></div>
+      </div>
+      <div class="approved-report-grid">
+        <div><span class="cf-label">Approved items</span><span class="cf-val">${items.length}</span></div>
+        <div><span class="cf-label">Client price (inc. GST)</span><span class="cf-val">${fmtCost(total)}</span></div>
+        <div><span class="cf-label">Cost to business</span><span class="cf-val">${fmtCost(cost)}</span></div>
+        <div><span class="cf-label">Profit</span><span class="cf-val" style="color:var(--success)">${fmtCost(profit)}</span></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="downloadApprovedReport('${downloadArg}')" ${items.length === 0 ? 'disabled' : ''}>
+        <i class="ti ti-file-download"></i> Download ${label} Report (PDF)
+      </button>
+    </div>`;
+  };
 
   const pending = list.filter(c => c.status === 'Pending').length;
   const days = list.filter(c => c.status !== 'Rejected').reduce((s,c)=>s+c.days,0);
@@ -1139,30 +1162,21 @@ function renderJobSummary() {
   if (pending > 0) alerts += `<div class="alert-box alert-warning"><i class="ti ti-alert-triangle" style="font-size:18px"></i> ${pending} change${pending>1?'s':''} still awaiting approval.</div>`;
   if (days > 5) alerts += `<div class="alert-box alert-warning" style="margin-top:10px"><i class="ti ti-clock" style="font-size:18px"></i> Schedule exposure for this job is <strong>${days} days</strong>.</div>`;
 
-  alerts += `
-    <div class="approved-report-card">
-      <div class="approved-report-head">
-        <div><i class="ti ti-lock" style="margin-right:6px"></i><strong>Approved variations — internal</strong></div>
-      </div>
-      <div class="approved-report-grid">
-        <div><span class="cf-label">Approved items</span><span class="cf-val">${approvedList.length}</span></div>
-        <div><span class="cf-label">Client price (inc. GST)</span><span class="cf-val">${fmtCost(approvedTotal)}</span></div>
-        <div><span class="cf-label">Cost to business</span><span class="cf-val">${fmtCost(approvedCost)}</span></div>
-        <div><span class="cf-label">Profit</span><span class="cf-val" style="color:var(--success)">${fmtCost(approvedProfit)}</span></div>
-      </div>
-      <button class="btn btn-primary" style="margin-top:12px" onclick="downloadApprovedReport()" ${approvedList.length === 0 ? 'disabled' : ''}>
-        <i class="ti ti-file-download"></i> Download Approved Variations Report (PDF)
-      </button>
-    </div>`;
+  alerts += `<div class="report-panels-grid">`
+    + reportPanel(approvedPlanA, 'Drafting', 'ti-versions', 'Plan A change')
+    + reportPanel(approvedAddl, 'Estimating', 'ti-circle-plus', 'Additional inclusion')
+    + `</div>`;
 
   document.getElementById('summaryAlerts').innerHTML = alerts;
 }
 
-function downloadApprovedReport() {
+function downloadApprovedReport(scope) {
+  // scope: 'Plan A change' (Drafting) or 'Additional inclusion' (Estimating)
   const job = jobs.find(j => j.id === activeJobId);
   if (!job) return;
-  const approved = changes.filter(c => c.jobId === activeJobId && c.status === 'Approved');
-  if (!approved.length) { showToast('No approved variations to report yet', true); return; }
+  const reportLabel = scope === 'Plan A change' ? 'Drafting' : 'Estimating';
+  const approved = changes.filter(c => c.jobId === activeJobId && c.status === 'Approved' && c.type === scope);
+  if (!approved.length) { showToast(`No approved ${reportLabel.toLowerCase()} items to report yet`, true); return; }
 
   const rows = approved.map((c, idx) => {
     const cost = changeCost(c);
@@ -1173,7 +1187,6 @@ function downloadApprovedReport() {
       <tr>
         <td>${idx + 1}</td>
         <td>CR-${String(c.id).padStart(4,'0')}${packLabel ? ` (Pack ${packLabel})` : ''}</td>
-        <td>${c.type === 'Plan A change' ? 'Plan A change' : 'Post-prelim addition'}</td>
         <td>${c.desc}</td>
         <td class="num">$${cost.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
         <td class="num">$${profit.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
@@ -1186,11 +1199,12 @@ function downloadApprovedReport() {
   const totalClient = approved.reduce((s,c) => s+changeTotal(c), 0);
 
   const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Approved Variations Report — ${job.name}</title>
+<html><head><meta charset="UTF-8"><title>Approved Variations — ${reportLabel} — ${job.name}</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1A1F18; padding: 40px; max-width: 900px; margin: 0 auto; }
   h1 { font-size: 20px; margin-bottom: 4px; }
+  .report-tag { display: inline-block; background: #1B3A2D; color: #fff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 12px; border-radius: 100px; margin-bottom: 10px; }
   .sub { color: #7A8178; font-size: 13px; margin-bottom: 24px; }
   .meta-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 24px; }
   .meta-box { background: #F7F8F6; border-radius: 8px; padding: 12px 16px; }
@@ -1205,7 +1219,8 @@ function downloadApprovedReport() {
   @media print { body { padding: 20px; } }
 </style></head>
 <body>
-  <h1>Approved Variations Report</h1>
+  <div class="report-tag">${reportLabel}</div>
+  <h1>Approved Variations — ${reportLabel}</h1>
   <div class="sub">${job.name}${job.ref ? ' — ' + job.ref : ''} &nbsp;|&nbsp; Generated ${fmtDate(today())}</div>
 
   <div class="meta-grid">
@@ -1215,10 +1230,10 @@ function downloadApprovedReport() {
   </div>
 
   <table>
-    <thead><tr><th>#</th><th>Ref</th><th>Type</th><th>Description</th><th>Cost to business</th><th>Profit</th><th>Client price (inc. GST)</th></tr></thead>
+    <thead><tr><th>#</th><th>Ref</th><th>Description</th><th>Cost to business</th><th>Profit</th><th>Client price (inc. GST)</th></tr></thead>
     <tbody>${rows}</tbody>
     <tfoot>
-      <tr><td colspan="4">TOTAL</td><td class="num">$${totalCost.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="num">$${totalProfit.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="num">$${totalClient.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>
+      <tr><td colspan="3">TOTAL</td><td class="num">$${totalCost.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="num">$${totalProfit.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="num">$${totalClient.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>
     </tfoot>
   </table>
 
