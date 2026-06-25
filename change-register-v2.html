@@ -179,6 +179,20 @@
   .badge-pending { background: var(--warning-bg); color: var(--warning); }
   .badge-approved { background: var(--success-bg); color: var(--success); }
   .badge-rejected { background: var(--danger-bg); color: var(--danger); }
+  .approved-report-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 14px; }
+  .approved-report-head { font-size: 14px; margin-bottom: 12px; color: var(--text); }
+  .approved-report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; }
+  .approved-report-grid > div { display: flex; flex-direction: column; gap: 3px; }
+
+  .internal-row {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--text2);
+    background: var(--surface3); border: 1px dashed var(--border2); border-radius: var(--radius);
+    padding: 7px 10px; margin-top: 8px;
+  }
+  .internal-row i { color: var(--text3); font-size: 13px; }
+  .internal-divider { color: var(--border2); }
+  .internal-row .profit-val { color: var(--success); }
+
   .pack-tag-row { margin-bottom: 8px; }
   .pack-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; background: var(--brand-light); color: var(--brand); padding: 4px 10px; border-radius: 100px; cursor: pointer; }
   .pack-tag:hover { background: var(--brand-mid); color: #fff; }
@@ -264,6 +278,10 @@
   .cs-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; color: var(--text2); }
   .cs-row.total { font-size: 16px; font-weight: 700; color: var(--brand); border-top: 1px solid var(--border2); margin-top: 6px; padding-top: 10px; }
   .cs-row.client-note { font-size: 11px; color: var(--text3); margin-top: 6px; font-style: italic; }
+  .cs-internal { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border2); }
+  .cs-internal-label { font-size: 11px; font-weight: 600; color: var(--text3); display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+  .cs-internal .cs-row span:last-child { font-weight: 600; color: var(--text); }
+  .cs-internal .profit-val { color: var(--success) !important; }
 
   /* Email modal */
   .email-modal { width: 540px; max-width: 90vw; }
@@ -844,7 +862,18 @@ function calcCosts(items, markupMaterial, markupLabour, gstPct) {
   const subtotalMarked = matMarked + labMarked;
   const gst = subtotalMarked * ((gstPct||0)/100);
   const total = subtotalMarked + gst;
-  return { matSubtotal, labSubtotal, matMarked, labMarked, subtotalMarked, gst, total };
+  const baseCost = matSubtotal + labSubtotal; // cost to business, exc. GST
+  const profit = subtotalMarked - baseCost;    // markup amount, exc. GST — true margin
+  return { matSubtotal, labSubtotal, matMarked, labMarked, subtotalMarked, gst, total, baseCost, profit };
+}
+
+function changeCost(c) {
+  if (c.items && c.items.length) return calcCosts(c.items, c.markupMaterial, c.markupLabour, c.gst).baseCost;
+  return 0;
+}
+function changeProfit(c) {
+  if (c.items && c.items.length) return calcCosts(c.items, c.markupMaterial, c.markupLabour, c.gst).profit;
+  return 0;
 }
 
 function renderCostSummary() {
@@ -858,6 +887,11 @@ function renderCostSummary() {
     <div class="cs-row"><span>GST (${gstPct}%)</span><span>$${c.gst.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
     <div class="cs-row total"><span>Variation total (inc. GST)</span><span>$${c.total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
     <div class="cs-row client-note">This is the only figure the client sees — no cost or markup detail is shared with them.</div>
+    <div class="cs-internal">
+      <div class="cs-internal-label"><i class="ti ti-lock"></i> Internal only — not shown to client</div>
+      <div class="cs-row"><span>Cost to business</span><span>$${c.baseCost.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+      <div class="cs-row"><span>Profit (markup exc. GST)</span><span class="profit-val">$${c.profit.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+    </div>
   `;
 }
 
@@ -980,6 +1014,12 @@ function buildChangeCard(c) {
         <div class="card-field"><span class="cf-label">Schedule impact</span><span class="cf-val time">${c.days ? (c.days > 0 ? '+' : '') + c.days + ' days' : '—'}</span></div>
         ${c.photo ? `<div class="card-field"><span class="cf-label">Photo / doc ref</span><span class="cf-val">${c.photo}</span></div>` : ''}
       </div>
+      <div class="internal-row">
+        <i class="ti ti-lock" title="Internal only — not shown to client"></i>
+        <span>Cost to business: <strong>${fmtCost(changeCost(c))}</strong></span>
+        <span class="internal-divider">|</span>
+        <span>Profit: <strong class="profit-val">${fmtCost(changeProfit(c))}</strong></span>
+      </div>
       ${c.items && c.items.length ? `<div class="card-notes"><i class="ti ti-list" style="vertical-align:-2px;margin-right:4px"></i>${c.items.length} item${c.items.length>1?'s':''} (${c.items.filter(i=>i.kind==='Material').length} material, ${c.items.filter(i=>i.kind==='Labour').length} labour)</div>` : ''}
       ${c.notes ? `<div class="card-notes"><i class="ti ti-note" style="vertical-align:-2px;margin-right:4px"></i>${c.notes}</div>` : ''}
         </div>
@@ -1083,15 +1123,116 @@ function renderJobSummary() {
       <div class="bc-row"><span class="bc-row-label">Rejected</span><span class="bc-row-val" style="color:var(--danger)">${l.filter(c=>c.status==='Rejected').length}</span></div>
       <div class="bc-row"><span class="bc-row-label">Variation total</span><span class="bc-row-val">${fmtCost(l.reduce((s,c)=>s+changeTotal(c),0))}</span></div>
       <div class="bc-row"><span class="bc-row-label">Schedule impact</span><span class="bc-row-val">${l.reduce((s,c)=>s+c.days,0)} days</span></div>
+      <div class="bc-row" style="border-top:1px dashed var(--border2);margin-top:4px;padding-top:8px"><span class="bc-row-label"><i class="ti ti-lock" style="font-size:11px;vertical-align:-1px"></i> Cost to business</span><span class="bc-row-val">${fmtCost(l.filter(c=>c.status!=='Rejected').reduce((s,c)=>s+changeCost(c),0))}</span></div>
+      <div class="bc-row"><span class="bc-row-label"><i class="ti ti-lock" style="font-size:11px;vertical-align:-1px"></i> Profit</span><span class="bc-row-val" style="color:var(--success)">${fmtCost(l.filter(c=>c.status!=='Rejected').reduce((s,c)=>s+changeProfit(c),0))}</span></div>
     </div>`;
   document.getElementById('breakdownGrid').innerHTML = bc(planA,'Plan A changes','badge-plan') + bc(addl,'Post-prelim additions','badge-add');
+
+  const approvedList = list.filter(c => c.status === 'Approved');
+  const approvedCost = approvedList.reduce((s,c) => s+changeCost(c), 0);
+  const approvedProfit = approvedList.reduce((s,c) => s+changeProfit(c), 0);
+  const approvedTotal = approvedList.reduce((s,c) => s+changeTotal(c), 0);
 
   const pending = list.filter(c => c.status === 'Pending').length;
   const days = list.filter(c => c.status !== 'Rejected').reduce((s,c)=>s+c.days,0);
   let alerts = '';
   if (pending > 0) alerts += `<div class="alert-box alert-warning"><i class="ti ti-alert-triangle" style="font-size:18px"></i> ${pending} change${pending>1?'s':''} still awaiting approval.</div>`;
   if (days > 5) alerts += `<div class="alert-box alert-warning" style="margin-top:10px"><i class="ti ti-clock" style="font-size:18px"></i> Schedule exposure for this job is <strong>${days} days</strong>.</div>`;
+
+  alerts += `
+    <div class="approved-report-card">
+      <div class="approved-report-head">
+        <div><i class="ti ti-lock" style="margin-right:6px"></i><strong>Approved variations — internal</strong></div>
+      </div>
+      <div class="approved-report-grid">
+        <div><span class="cf-label">Approved items</span><span class="cf-val">${approvedList.length}</span></div>
+        <div><span class="cf-label">Client price (inc. GST)</span><span class="cf-val">${fmtCost(approvedTotal)}</span></div>
+        <div><span class="cf-label">Cost to business</span><span class="cf-val">${fmtCost(approvedCost)}</span></div>
+        <div><span class="cf-label">Profit</span><span class="cf-val" style="color:var(--success)">${fmtCost(approvedProfit)}</span></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="downloadApprovedReport()" ${approvedList.length === 0 ? 'disabled' : ''}>
+        <i class="ti ti-file-download"></i> Download Approved Variations Report (PDF)
+      </button>
+    </div>`;
+
   document.getElementById('summaryAlerts').innerHTML = alerts;
+}
+
+function downloadApprovedReport() {
+  const job = jobs.find(j => j.id === activeJobId);
+  if (!job) return;
+  const approved = changes.filter(c => c.jobId === activeJobId && c.status === 'Approved');
+  if (!approved.length) { showToast('No approved variations to report yet', true); return; }
+
+  const rows = approved.map((c, idx) => {
+    const cost = changeCost(c);
+    const profit = changeProfit(c);
+    const total = changeTotal(c);
+    const packLabel = c.packId ? (packs.find(p => p.id === c.packId)?.packNumber) : null;
+    return `
+      <tr>
+        <td>${idx + 1}</td>
+        <td>CR-${String(c.id).padStart(4,'0')}${packLabel ? ` (Pack ${packLabel})` : ''}</td>
+        <td>${c.type === 'Plan A change' ? 'Plan A change' : 'Post-prelim addition'}</td>
+        <td>${c.desc}</td>
+        <td class="num">$${cost.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+        <td class="num">$${profit.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+        <td class="num">$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      </tr>`;
+  }).join('');
+
+  const totalCost = approved.reduce((s,c) => s+changeCost(c), 0);
+  const totalProfit = approved.reduce((s,c) => s+changeProfit(c), 0);
+  const totalClient = approved.reduce((s,c) => s+changeTotal(c), 0);
+
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Approved Variations Report — ${job.name}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1A1F18; padding: 40px; max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .sub { color: #7A8178; font-size: 13px; margin-bottom: 24px; }
+  .meta-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 24px; }
+  .meta-box { background: #F7F8F6; border-radius: 8px; padding: 12px 16px; }
+  .meta-label { font-size: 11px; text-transform: uppercase; color: #7A8178; font-weight: 600; }
+  .meta-val { font-size: 18px; font-weight: 700; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+  th { text-align: left; background: #1B3A2D; color: #fff; padding: 8px 10px; font-size: 11px; text-transform: uppercase; }
+  td { padding: 8px 10px; border-bottom: 1px solid #DDE1D9; vertical-align: top; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tfoot td { font-weight: 700; border-top: 2px solid #1B3A2D; border-bottom: none; }
+  .confidential { margin-top: 28px; font-size: 11px; color: #7A8178; border-top: 1px solid #DDE1D9; padding-top: 12px; }
+  @media print { body { padding: 20px; } }
+</style></head>
+<body>
+  <h1>Approved Variations Report</h1>
+  <div class="sub">${job.name}${job.ref ? ' — ' + job.ref : ''} &nbsp;|&nbsp; Generated ${fmtDate(today())}</div>
+
+  <div class="meta-grid">
+    <div class="meta-box"><div class="meta-label">Approved items</div><div class="meta-val">${approved.length}</div></div>
+    <div class="meta-box"><div class="meta-label">Total cost to business</div><div class="meta-val">$${totalCost.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
+    <div class="meta-box"><div class="meta-label">Total profit</div><div class="meta-val">$${totalProfit.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
+  </div>
+
+  <table>
+    <thead><tr><th>#</th><th>Ref</th><th>Type</th><th>Description</th><th>Cost to business</th><th>Profit</th><th>Client price (inc. GST)</th></tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot>
+      <tr><td colspan="4">TOTAL</td><td class="num">$${totalCost.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="num">$${totalProfit.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="num">$${totalClient.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>
+    </tfoot>
+  </table>
+
+  <div class="confidential">Internal document — for sales/estimating use only. Not for distribution to clients.</div>
+
+  <scr` + `ipt>
+    window.onload = function() { window.print(); };
+  <\/script>
+</body></html>`;
+
+  const win = window.open('', '_blank');
+  if (!win) { showToast('Please allow pop-ups to generate the report', true); return; }
+  win.document.write(html);
+  win.document.close();
 }
 
 function showToast(msg, isError = false) {
@@ -1153,6 +1294,16 @@ function updateBulkBar() {
 }
 
 /* ---------- email ---------- */
+function itemsIncludedText(c) {
+  if (!c.items || !c.items.length) return '';
+  const mats = c.items.filter(i => i.kind === 'Material' && i.desc.trim());
+  const labs = c.items.filter(i => i.kind === 'Labour' && i.desc.trim());
+  let out = '';
+  if (mats.length) out += `   Materials included: ${mats.map(i => i.desc.trim()).join(', ')}\n`;
+  if (labs.length) out += `   Labour included: ${labs.map(i => i.desc.trim()).join(', ')}\n`;
+  return out;
+}
+
 function openEmailModal(changeId) {
   const c = changes.find(x => x.id === changeId);
   const job = jobs.find(j => j.id === c.jobId);
@@ -1163,9 +1314,9 @@ function openEmailModal(changeId) {
   const typeLabel = c.type === 'Plan A change' ? 'plan change' : 'additional inclusion';
 
   document.getElementById('emailTo').value = '';
-  document.getElementById('emailSubject').value = `Variation notice — ${job.name} — CR-${String(c.id).padStart(4,'0')}`;
+  document.getElementById('emailSubject').value = `Estimate Variation — ${job.name} — CR-${String(c.id).padStart(4,'0')}`;
   document.getElementById('emailBody').value =
-`VARIATION NOTICE
+`ESTIMATE VARIATION
 
 Project: ${job.name}
 Date: ${fmtDate(today())}
@@ -1173,7 +1324,7 @@ Date: ${fmtDate(today())}
 The following variation captures a ${typeLabel} for your project. All prices are inclusive of GST.
 
 1. ${c.desc}
-${c.days ? `   Schedule impact: ${c.days > 0 ? '+' : ''}${c.days} day${Math.abs(c.days) !== 1 ? 's' : ''}\n` : ''}   Amount (incl. GST): $${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}
+${itemsIncludedText(c)}${c.days ? `   Schedule impact: ${c.days > 0 ? '+' : ''}${c.days} day${Math.abs(c.days) !== 1 ? 's' : ''}\n` : ''}   Amount (incl. GST): $${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}
 
 TOTAL ADDITIONAL COST (incl. GST): $${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}
 
@@ -1197,13 +1348,14 @@ function openBulkEmailModal() {
   pendingBulkChangeIds = [...selectedChangeIds];
   const packNum = nextPackNumberForJob(activeJobId);
 
-  let body = `VARIATION NOTICE — PACK ${packNum}\n\nProject: ${job.name}\nDate: ${fmtDate(today())}\n\nThe following variations capture additional works and changes agreed for your project. All prices are inclusive of GST.\n\n`;
+  let body = `ESTIMATE VARIATION — PACK ${packNum}\n\nProject: ${job.name}\nDate: ${fmtDate(today())}\n\nThe following variations capture additional works and changes agreed for your project. All prices are inclusive of GST.\n\n`;
 
   let grandTotal = 0;
   list.forEach((c, idx) => {
     const total = changeTotal(c);
     grandTotal += total;
     body += `${idx + 1}. ${c.desc}\n`;
+    body += itemsIncludedText(c);
     if (c.days) body += `   Schedule impact: ${c.days > 0 ? '+' : ''}${c.days} day${Math.abs(c.days) !== 1 ? 's' : ''}\n`;
     body += `   Amount (incl. GST): $${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}\n\n`;
   });
@@ -1211,7 +1363,7 @@ function openBulkEmailModal() {
   body += `TOTAL ADDITIONAL COST (incl. GST): $${grandTotal.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}\n\nPlease reply to this email or sign and return to confirm your acceptance of these variations.\n\nKind regards,`;
 
   document.getElementById('emailTo').value = '';
-  document.getElementById('emailSubject').value = `Variation notice — ${job.name} — Pack ${packNum}`;
+  document.getElementById('emailSubject').value = `Estimate Variation — ${job.name} — Pack ${packNum}`;
   document.getElementById('emailBody').value = body;
 
   document.getElementById('emailModal').classList.add('show');
