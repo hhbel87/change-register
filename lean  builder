@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lean Builder Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: rgba(0,0,0,0.1);
+  --border-strong: rgba(0,0,0,0.18);
+  --text: #1a1916;
+  --text2: #6b6760;
+  --text3: #a09d98;
+  --red: #c0392b;
+  --red-bg: #fdf0ee;
+  --red-border: #f5c6c0;
+  --amber: #9a6200;
+  --amber-bg: #fdf6e3;
+  --amber-border: #f0d98a;
+  --orange: #b84f00;
+  --orange-bg: #fff1e8;
+  --orange-border: #fac49a;
+  --green: #2a6b3c;
+  --green-bg: #edf7f1;
+  --green-border: #a8dab8;
+  --blue: #1a4a8a;
+  --blue-bg: #edf3fc;
+  --blue-border: #b0c8f0;
+  --purple: #4a35a0;
+  --purple-bg: #f0ecfe;
+  --purple-border: #c8bef5;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+.header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 24px; display: flex; align-items: center; gap: 0;
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { font-family: 'DM Mono', monospace; font-weight: 500; font-size: 13px; letter-spacing: 0.08em; color: var(--text); text-transform: uppercase; padding: 16px 0; margin-right: 32px; white-space: nowrap; }
+.logo span { color: var(--red); }
+.nav { display: flex; gap: 0; flex: 1; }
+.nav-btn { padding: 20px 18px; font-size: 13px; font-weight: 500; color: var(--text2); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; transition: color 0.15s; white-space: nowrap; font-family: 'DM Sans', sans-serif; }
+.nav-btn:hover { color: var(--text); }
+.nav-btn.active { color: var(--text); border-bottom-color: var(--text); }
+.nav-btn i { font-size: 15px; }
+.sync-chip { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text2); font-family:'DM Mono',monospace; white-space:nowrap; }
+.sync-dot { width:8px; height:8px; border-radius:50%; background:var(--green); flex-shrink:0; }
+.sync-dot.syncing { background:var(--amber); }
+.sync-dot.error { background:var(--red); }
+.loading-overlay { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; gap:14px; align-items:center; justify-content:center; z-index:999; font-size:13px; color:var(--text2); font-family:'DM Sans',sans-serif; }
+.spinner { width:26px; height:26px; border:3px solid var(--border); border-top-color:var(--text); border-radius:50%; animation:lbbspin 0.8s linear infinite; }
+@keyframes lbbspin { to { transform:rotate(360deg); } }
+.header-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.date-chip { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); background: var(--surface2); padding: 5px 10px; border-radius: var(--radius); letter-spacing: 0.03em; }
+.main { flex: 1; padding: 28px 24px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+.btn:hover { background: var(--surface2); }
+.btn i { font-size: 14px; }
+.btn-dark { background: var(--text); color: #fff; border-color: var(--text); }
+.btn-dark:hover { background: #333; }
+.btn-red { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+.btn-red:hover { background: var(--red-border); }
+.btn-amber { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); }
+.btn-amber:hover { background: var(--amber-border); }
+.btn-green { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+.btn-green:hover { background: var(--green-border); }
+.btn-blue { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-border); }
+.btn-blue:hover { background: var(--blue-border); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-sm i { font-size: 13px; }
+.icon-btn { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 15px; padding: 3px 5px; border-radius: 5px; transition: all 0.12s; line-height: 1; font-family: 'DM Sans', sans-serif; }
+.icon-btn:hover { background: var(--surface2); color: var(--text); }
+.icon-btn.active-red { color: var(--red); }
+.icon-btn.active-amber { color: var(--amber); }
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* Dashboard */
+.dash-topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.dash-title { font-size: 20px; font-weight: 600; flex: 1; }
+.metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 28px; }
+.metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
+.metric-card.red { border-left: 3px solid var(--red); }
+.metric-card.amber { border-left: 3px solid #d4a000; }
+.metric-card.orange { border-left: 3px solid var(--orange); }
+.metric-card.green { border-left: 3px solid #39a05c; }
+.metric-val { font-size: 32px; font-weight: 600; line-height: 1; font-family: 'DM Mono', monospace; }
+.metric-card.red .metric-val { color: var(--red); }
+.metric-card.amber .metric-val { color: var(--amber); }
+.metric-card.orange .metric-val { color: var(--orange); }
+.metric-card.green .metric-val { color: var(--green); }
+.metric-label { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 4px; }
+
+/* Upcoming deadlines strip */
+.upcoming-strip { margin-bottom: 24px; }
+.upcoming-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text2); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.upcoming-scroll { display: flex; gap: 8px; flex-wrap: wrap; }
+.deadline-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px 12px;
+  font-size: 12px; box-shadow: var(--shadow); min-width: 0;
+}
+.deadline-chip.due-overdue { border-left: 3px solid var(--red); background: var(--red-bg); }
+.deadline-chip.due-today { border-left: 3px solid var(--red); }
+.deadline-chip.due-soon { border-left: 3px solid var(--orange); }
+.deadline-chip.due-week { border-left: 3px solid var(--amber); }
+.deadline-chip.due-later { border-left: 3px solid var(--border-strong); }
+.dc-job { font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.dc-task { color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.dc-date { font-family: 'DM Mono', monospace; font-size: 11px; white-space: nowrap; }
+.dc-date.overdue { color: var(--red); font-weight: 600; }
+.dc-date.soon { color: var(--orange); font-weight: 600; }
+.dc-date.week { color: var(--amber); }
+.dc-date.later { color: var(--text3); }
+
+.kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
+.kanban-col { display: flex; flex-direction: column; gap: 8px; }
+.col-header { display: flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: var(--radius); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.col-header i { font-size: 13px; }
+.col-header .col-count { margin-left: auto; font-family: 'DM Mono', monospace; }
+.col-critical { background: var(--red-bg); color: var(--red); }
+.col-todo { background: var(--amber-bg); color: var(--amber); }
+.col-done { background: var(--green-bg); color: var(--green); }
+
+.task-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 13px; box-shadow: var(--shadow); transition: box-shadow 0.15s; }
+.task-card:hover { box-shadow: var(--shadow-md); }
+.task-card.is-critical { border-left: 3px solid var(--red); }
+.task-card.is-done { opacity: 0.5; box-shadow: none; }
+.task-text-main { font-size: 13px; line-height: 1.45; margin-bottom: 6px; color: var(--text); font-weight: 500; }
+.task-text-main.done { text-decoration: line-through; color: var(--text3); font-weight: 400; }
+
+/* Sub-steps on dashboard card */
+.card-substeps { margin-bottom: 8px; display: flex; flex-direction: column; gap: 3px; }
+.card-substep { display: flex; align-items: flex-start; gap: 5px; font-size: 12px; color: var(--text2); }
+.card-substep input[type=checkbox] { margin-top: 2px; accent-color: var(--blue); flex-shrink: 0; }
+.card-substep span.done { text-decoration: line-through; color: var(--text3); }
+.card-substep-progress { font-size: 11px; color: var(--text3); margin-bottom: 5px; font-family: 'DM Mono', monospace; }
+
+.task-due-badge { font-size: 11px; padding: 2px 7px; border-radius: 9px; font-weight: 500; white-space: nowrap; }
+.due-overdue-badge { background: var(--red-bg); color: var(--red); }
+.due-today-badge { background: var(--red-bg); color: var(--red); }
+.due-soon-badge { background: var(--orange-bg); color: var(--orange); }
+.due-week-badge { background: var(--amber-bg); color: var(--amber); }
+
+.task-footer { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.pill { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+.pill-fee { background: var(--blue-bg); color: var(--blue); }
+.pill-est { background: var(--surface2); color: var(--text2); }
+.pill-crit { background: var(--red-bg); color: var(--red); }
+.task-actions { margin-left: auto; display: flex; gap: 2px; }
+.col-empty { border: 1px dashed var(--border); border-radius: var(--radius); padding: 20px; text-align: center; font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+/* Jobs view */
+.view-topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.view-title { font-size: 18px; font-weight: 600; flex: 1; }
+.jobs-list { display: flex; flex-direction: column; gap: 8px; }
+.job-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+.job-hdr { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; user-select: none; flex-wrap: wrap; transition: background 0.12s; }
+.job-hdr:hover { background: var(--surface2); }
+.stage-pill { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.sp-0 { background: #f0ede8; color: #5a5752; }
+.sp-1 { background: var(--amber-bg); color: var(--amber); }
+.sp-2 { background: var(--blue-bg); color: var(--blue); }
+.sp-3 { background: #f0ecfe; color: #4a3fa0; }
+.sp-4 { background: #fff4e0; color: #8a5e00; }
+.sp-5 { background: var(--green-bg); color: var(--green); }
+.sp-6 { background: #fdf0f5; color: #8a2a52; }
+.sp-7 { background: #e8f8f2; color: #1a6645; }
+.sp-8 { background: #fff0e8; color: #7a3500; }
+.sp-9 { background: #f0f0f0; color: #4a4a4a; }
+.job-name-txt { font-size: 14px; font-weight: 500; flex: 1; min-width: 80px; }
+.job-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+.badge-crit { background: var(--red-bg); color: var(--red); }
+.badge-today { background: var(--amber-bg); color: var(--amber); }
+.chevron { font-size: 15px; color: var(--text3); transition: transform 0.18s; flex-shrink: 0; }
+.chevron.open { transform: rotate(180deg); }
+.job-body { border-top: 1px solid var(--border); padding: 14px 16px; display: none; }
+.job-body.open { display: block; }
+.job-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.stage-select { font-size: 12px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 5px 8px; background: var(--bg); color: var(--text); cursor: pointer; }
+
+/* Task rows in job */
+.job-tasks { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+.job-task-row { border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; background: var(--bg); }
+.jtr-top { display: flex; align-items: flex-start; gap: 8px; }
+.task-cb { margin-top: 2px; accent-color: var(--blue); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+.jt-text { font-size: 13px; flex: 1; line-height: 1.4; font-weight: 500; }
+.jt-text.done { text-decoration: line-through; color: var(--text3); font-weight: 400; }
+.jt-meta { display: flex; align-items: center; gap: 5px; margin-top: 6px; margin-left: 22px; flex-wrap: wrap; }
+.jt-pill { font-size: 10px; padding: 2px 6px; border-radius: 9px; font-weight: 500; }
+.jt-today { background: var(--amber-bg); color: var(--amber); }
+.jt-critical { background: var(--red-bg); color: var(--red); }
+.jt-due { font-size: 11px; font-family: 'DM Mono', monospace; padding: 2px 6px; border-radius: 9px; }
+.jt-due.overdue { background: var(--red-bg); color: var(--red); font-weight: 600; }
+.jt-due.due-today { background: var(--red-bg); color: var(--red); }
+.jt-due.due-soon { background: var(--orange-bg); color: var(--orange); }
+.jt-due.due-week { background: var(--amber-bg); color: var(--amber); }
+.jt-due.due-later { background: var(--surface2); color: var(--text2); }
+
+/* Sub-steps */
+.substeps { margin-top: 8px; margin-left: 22px; display: flex; flex-direction: column; gap: 4px; }
+.substep-row { display: flex; align-items: flex-start; gap: 6px; font-size: 12px; color: var(--text2); }
+.substep-cb { margin-top: 2px; accent-color: var(--green); width: 13px; height: 13px; flex-shrink: 0; cursor: pointer; }
+.substep-text { flex: 1; line-height: 1.35; }
+.substep-text.done { text-decoration: line-through; color: var(--text3); }
+.substep-del { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 13px; padding: 0 2px; }
+.substep-del:hover { color: var(--red); }
+.add-substep-row { display: flex; gap: 5px; margin-top: 5px; margin-left: 22px; }
+.add-substep-row input { flex: 1; min-width: 80px; padding: 4px 7px; font-size: 12px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); color: var(--text); }
+.add-substep-row input:focus { outline: none; border-color: var(--blue); }
+.substep-toggle { font-size: 11px; color: var(--text3); background: none; border: none; cursor: pointer; padding: 2px 4px; margin-left: 22px; margin-top: 4px; display: flex; align-items: center; gap: 3px; font-family: 'DM Sans', sans-serif; }
+.substep-toggle:hover { color: var(--text); }
+.progress-bar-wrap { height: 3px; background: var(--surface2); border-radius: 2px; margin: 6px 0 0 22px; overflow: hidden; }
+.progress-bar { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s; }
+
+.add-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.add-row input { flex: 1; min-width: 120px; padding: 7px 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg); color: var(--text); }
+.add-row input:focus { outline: none; border-color: var(--blue); }
+.no-tasks { font-size: 12px; color: var(--text3); font-style: italic; padding: 6px 0 10px; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 13px; }
+.empty-state i { font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.4; }
+.promote-btn { font-size: 12px; background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); border-radius: var(--radius); padding: 4px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+.promote-btn:hover { background: var(--green-border); }
+
+/* Modal */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 500; padding: 20px; }
+.modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-md); padding: 24px; width: 100%; max-width: 420px; }
+.modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 18px; }
+.modal label { font-size: 12px; font-weight: 500; color: var(--text2); display: block; margin-bottom: 5px; }
+.modal input, .modal select, .modal textarea { width: 100%; padding: 8px 11px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg); color: var(--text); margin-bottom: 14px; }
+.modal input:focus, .modal select:focus { outline: none; border-color: var(--blue); }
+.modal-hint { font-size: 11px; color: var(--text3); margin-top: -10px; margin-bottom: 14px; }
+.modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+.confirm-box { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-md); padding: 24px; width: 100%; max-width: 340px; text-align: center; }
+.confirm-box p { font-size: 14px; color: var(--text2); margin-bottom: 18px; line-height: 1.5; }
+.confirm-box .confirm-btns { display: flex; gap: 8px; justify-content: center; }
+
+@media (max-width: 750px) {
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .kanban { grid-template-columns: 1fr; }
+  .main { padding: 16px; }
+  .header { padding: 0 14px; }
+  .logo { margin-right: 14px; font-size: 12px; }
+  .nav-btn { padding: 18px 12px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="logo">LEAN<span>.</span>BUILD</div>
+    <nav class="nav">
+      <button class="nav-btn active" onclick="switchTab('dashboard')" id="tab-dashboard"><i class="ti ti-layout-board"></i>Daily board</button>
+      <button class="nav-btn" onclick="switchTab('jobs')" id="tab-jobs"><i class="ti ti-briefcase"></i>Jobs</button>
+      <button class="nav-btn" onclick="switchTab('estimating')" id="tab-estimating"><i class="ti ti-calculator"></i>Estimating</button>
+    </nav>
+    <div class="header-right">
+      <span class="sync-chip"><span class="sync-dot syncing" id="syncDot"></span><span id="syncLabel">Connecting</span></span>
+      <span class="date-chip" id="date-chip"></span>
+    </div>
+  </header>
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="dash-topbar">
+        <span class="dash-title">Today's work</span>
+        <button class="btn btn-dark" onclick="showAddTask()"><i class="ti ti-plus"></i>Add task to board</button>
+      </div>
+      <div class="metrics">
+        <div class="metric-card red"><div class="metric-val" id="m-critical">0</div><div class="metric-label">Critical</div></div>
+        <div class="metric-card amber"><div class="metric-val" id="m-todo">0</div><div class="metric-label">To do today</div></div>
+        <div class="metric-card orange"><div class="metric-val" id="m-upcoming">0</div><div class="metric-label">Due this week</div></div>
+        <div class="metric-card green"><div class="metric-val" id="m-done">0</div><div class="metric-label">Done today</div></div>
+        <div class="metric-card"><div class="metric-val" id="m-jobs">0</div><div class="metric-label">Active jobs</div></div>
+      </div>
+      <div class="upcoming-strip" id="upcoming-strip" style="display:none">
+        <div class="upcoming-title"><i class="ti ti-calendar-due" style="font-size:13px"></i>Upcoming deadlines</div>
+        <div class="upcoming-scroll" id="upcoming-list"></div>
+      </div>
+      <div class="kanban">
+        <div>
+          <div class="col-header col-critical"><i class="ti ti-alert-triangle"></i>Critical<span class="col-count" id="cc-critical"></span></div>
+          <div class="kanban-col" id="col-critical"></div>
+        </div>
+        <div>
+          <div class="col-header col-todo"><i class="ti ti-clock"></i>To do today<span class="col-count" id="cc-todo"></span></div>
+          <div class="kanban-col" id="col-todo"></div>
+        </div>
+        <div>
+          <div class="col-header col-done"><i class="ti ti-circle-check"></i>Done<span class="col-count" id="cc-done"></span></div>
+          <div class="kanban-col" id="col-done"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOBS -->
+    <div class="view" id="view-jobs">
+      <div class="view-topbar">
+        <span class="view-title"><i class="ti ti-receipt" style="font-size:18px;vertical-align:-3px;margin-right:6px"></i>Fee-paid jobs</span>
+        <span style="font-size:13px;color:var(--text2)" id="fee-count"></span>
+        <button class="btn btn-blue" onclick="showAddJob('fee')"><i class="ti ti-plus"></i>Add job</button>
+      </div>
+      <div class="jobs-list" id="fee-list"></div>
+    </div>
+
+    <!-- ESTIMATING -->
+    <div class="view" id="view-estimating">
+      <div class="view-topbar">
+        <span class="view-title"><i class="ti ti-calculator" style="font-size:18px;vertical-align:-3px;margin-right:6px"></i>Estimating enquiries</span>
+        <span style="font-size:13px;color:var(--text2)" id="est-count"></span>
+        <button class="btn btn-green" onclick="showAddJob('est')"><i class="ti ti-plus"></i>Add enquiry</button>
+      </div>
+      <div class="jobs-list" id="est-list"></div>
+    </div>
+
+  </main>
+</div>
+<div id="modal-area"></div>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <span>Loading board&hellip;</span>
+</div>
+
+<script>
+const FEE_STAGES = ['Estimating','BOQ estimating in Constructor','Spec & tender','Planning permit','Tender presented / colours','Colours done / tender accepted','Contract signing','Building permit / site ready','Under construction','Handed over — maintenance period'];
+const SP_CLASS = ['sp-0','sp-1','sp-2','sp-3','sp-4','sp-5','sp-6','sp-7','sp-8','sp-9'];
+
+const DEFAULT_DATA = {
+  fee: [
+    {id:'j1',name:'19SMITH',stage:'Spec & tender',tasks:[]},
+    {id:'j2',name:'55IBBOTSON',stage:'Spec & tender',tasks:[]},
+    {id:'j3',name:'600MURROON',stage:'Planning permit',tasks:[]},
+    {id:'j4',name:'183GOR',stage:'Tender presented / colours',tasks:[]},
+    {id:'j5',name:'208PYRUS',stage:'Colours done / tender accepted',tasks:[]},
+    {id:'j6',name:'6BOSANQUET',stage:'Contract signing',tasks:[]},
+    {id:'j7',name:'8FLORENCE',stage:'Building permit / site ready',tasks:[]},
+    {id:'j8',name:'11TUX',stage:'Building permit / site ready',tasks:[]}
+  ],
+  est: []
+};
+
+let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let openJobs = new Set();
+let openSubsteps = new Set();
+
+// ---- Shared live storage (JSONBin) ----
+const API_KEY = '$2a$10$1EOxFnKlimGDUP1FjRPl1u3t4VDasPZtKvOTToVVPgBLFlMdvE53a';
+const BIN_NAME = 'lean-builder-board';
+let BIN_ID = localStorage.getItem('lbb_bin_id') || null;
+let saveTimer = null;
+let lastLocalChange = 0;
+
+function setSync(state) {
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  if (!dot) return;
+  dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'error' ? ' error' : '');
+  label.textContent = state === 'ok' ? 'Synced' : state === 'syncing' ? 'Syncing' : 'Offline';
+}
+
+async function findBinByName() {
+  try {
+    let lastId = null;
+    for (let page = 0; page < 5; page++) {
+      const url = 'https://api.jsonbin.io/v3/c/uncategorized/bins' + (lastId ? '/' + lastId : '');
+      const res = await fetch(url, { headers: { 'X-Master-Key': API_KEY } });
+      if (!res.ok) return null;
+      const list = await res.json();
+      if (!Array.isArray(list) || list.length === 0) return null;
+      for (const b of list) {
+        const name = (b.snippetMeta && b.snippetMeta.name) || b.name || '';
+        const id = b.record || (b.metadata && b.metadata.id) || b.id || null;
+        if (name === BIN_NAME && id) return id;
+        if (id) lastId = id;
+      }
+      if (list.length < 10) return null;
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function createBin(initial) {
+  const res = await fetch('https://api.jsonbin.io/v3/b', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Name': BIN_NAME, 'X-Bin-Private': 'false' },
+    body: JSON.stringify(initial)
+  });
+  if (!res.ok) throw new Error('create failed');
+  const d = await res.json();
+  return d.metadata.id;
+}
+
+async function loadData(isPoll) {
+  if (!isPoll) setSync('syncing');
+  try {
+    if (!BIN_ID) {
+      BIN_ID = await findBinByName();
+      if (!BIN_ID) {
+        // First ever load: carry across any existing local board data
+        let seed = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        try { const s = localStorage.getItem('lean_bldr_v2'); if (s) { const parsed = JSON.parse(s); if (parsed && parsed.fee) seed = parsed; } } catch(e) {}
+        BIN_ID = await createBin(seed);
+      }
+      localStorage.setItem('lbb_bin_id', BIN_ID);
+    }
+    const res = await fetch('https://api.jsonbin.io/v3/b/' + BIN_ID + '/latest', { headers: { 'X-Master-Key': API_KEY } });
+    if (!res.ok) throw new Error('load failed');
+    const d = await res.json();
+    if (d.record && d.record.fee) data = d.record;
+    setSync('ok');
+  } catch(e) {
+    // Offline fallback: use local cache so the board still opens
+    try { const s = localStorage.getItem('lean_bldr_v2'); if (s) { const parsed = JSON.parse(s); if (parsed && parsed.fee) data = parsed; } } catch(_) {}
+    setSync('error');
+  }
+  const ov = document.getElementById('loadingOverlay');
+  if (ov) ov.style.display = 'none';
+  renderAll();
+}
+
+function save() {
+  lastLocalChange = Date.now();
+  try { localStorage.setItem('lean_bldr_v2', JSON.stringify(data)); } catch(e) {}
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(pushData, 800);
+}
+
+async function pushData() {
+  if (!BIN_ID) return;
+  setSync('syncing');
+  try {
+    const res = await fetch('https://api.jsonbin.io/v3/b/' + BIN_ID, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('save failed');
+    setSync('ok');
+  } catch(e) { setSync('error'); }
+}
+
+// Pull fresh data from the shared store every 45s when idle
+setInterval(function() {
+  if (Date.now() - lastLocalChange < 15000) return;
+  const m = document.getElementById('modal-area');
+  if (m && m.innerHTML.trim()) return;
+  loadData(true);
+}, 45000);
+
+function switchTab(tab) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('view-' + tab).classList.add('active');
+  renderAll();
+}
+
+// Date helpers
+function today() {
+  const d = new Date(); d.setHours(0,0,0,0); return d;
+}
+function parseDue(ds) {
+  if (!ds) return null;
+  const d = new Date(ds + 'T00:00:00');
+  return isNaN(d) ? null : d;
+}
+function dueDiff(ds) {
+  const d = parseDue(ds); if (!d) return null;
+  const t = today();
+  return Math.round((d - t) / 86400000);
+}
+function dueClass(ds) {
+  const diff = dueDiff(ds);
+  if (diff === null) return null;
+  if (diff < 0) return 'overdue';
+  if (diff === 0) return 'due-today';
+  if (diff <= 3) return 'due-soon';
+  if (diff <= 7) return 'due-week';
+  return 'due-later';
+}
+function dueLabel(ds) {
+  const diff = dueDiff(ds);
+  if (diff === null) return '';
+  if (diff < 0) return `Overdue ${Math.abs(diff)}d`;
+  if (diff === 0) return 'Due today';
+  if (diff === 1) return 'Due tomorrow';
+  if (diff <= 7) return `Due in ${diff}d`;
+  const d = parseDue(ds);
+  return 'Due ' + d.toLocaleDateString('en-AU', {day:'numeric',month:'short'});
+}
+function shouldShowOnDash(ds) {
+  const diff = dueDiff(ds);
+  return diff !== null && diff <= 7;
+}
+
+function allTasks() {
+  const out = [];
+  data.fee.forEach(j => (j.tasks||[]).forEach(t => out.push({...t, jobName: j.name, jobId: j.id, type: 'fee'})));
+  data.est.forEach(j => (j.tasks||[]).forEach(t => out.push({...t, jobName: j.name, jobId: j.id, type: 'est'})));
+  return out;
+}
+
+function renderAll() {
+  const d = new Date();
+  document.getElementById('date-chip').textContent = d.toLocaleDateString('en-AU', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  const tasks = allTasks();
+  const todayTasks = tasks.filter(t => t.today);
+  const critical = todayTasks.filter(t => t.critical && !t.done);
+  const todo = todayTasks.filter(t => !t.critical && !t.done);
+  const done = todayTasks.filter(t => t.done);
+
+  // Upcoming: tasks with dueDate within 7 days, not already on today board
+  const upcoming = tasks.filter(t => !t.done && t.dueDate && shouldShowOnDash(t.dueDate));
+  // sort by date
+  upcoming.sort((a,b) => dueDiff(a.dueDate) - dueDiff(b.dueDate));
+  const weekCount = tasks.filter(t => !t.done && t.dueDate && dueDiff(t.dueDate) !== null && dueDiff(t.dueDate) >= 0 && dueDiff(t.dueDate) <= 7).length;
+
+  document.getElementById('m-critical').textContent = critical.length;
+  document.getElementById('m-todo').textContent = todo.length;
+  document.getElementById('m-done').textContent = done.length;
+  document.getElementById('m-upcoming').textContent = weekCount;
+  document.getElementById('m-jobs').textContent = data.fee.length;
+
+  document.getElementById('cc-critical').textContent = critical.length || '';
+  document.getElementById('cc-todo').textContent = todo.length || '';
+  document.getElementById('cc-done').textContent = done.length || '';
+
+  // Upcoming strip
+  const strip = document.getElementById('upcoming-strip');
+  const ul = document.getElementById('upcoming-list');
+  if (upcoming.length) {
+    strip.style.display = '';
+    ul.innerHTML = upcoming.map(t => {
+      const dc = dueClass(t.dueDate);
+      const dl = dueLabel(t.dueDate);
+      const dateClass = dc === 'overdue' || dc === 'due-today' ? 'overdue' : dc === 'due-soon' ? 'soon' : dc === 'due-week' ? 'week' : 'later';
+      return `<div class="deadline-chip ${dc}">
+        <i class="ti ti-calendar-event" style="font-size:13px;color:var(--text3);flex-shrink:0"></i>
+        <span class="dc-job">${esc(t.jobName)}</span>
+        <span class="dc-task">${esc(t.text)}</span>
+        <span class="dc-date ${dateClass}">${dl}</span>
+      </div>`;
+    }).join('');
+  } else {
+    strip.style.display = 'none';
+  }
+
+  document.getElementById('col-critical').innerHTML = critical.length ? critical.map(t => taskCardHTML(t)).join('') : '<div class="col-empty">No critical tasks</div>';
+  document.getElementById('col-todo').innerHTML = todo.length ? todo.map(t => taskCardHTML(t)).join('') : '<div class="col-empty">Nothing else on today</div>';
+  document.getElementById('col-done').innerHTML = done.length ? done.map(t => taskCardHTML(t)).join('') : '<div class="col-empty">Get cracking</div>';
+
+  renderFee();
+  renderEst();
+}
+
+function substepProgress(substeps) {
+  if (!substeps || !substeps.length) return null;
+  const done = substeps.filter(s => s.done).length;
+  return { done, total: substeps.length };
+}
+
+function taskCardHTML(t) {
+  const critClass = t.critical ? 'is-critical' : '';
+  const doneClass = t.done ? 'is-done' : '';
+  const tagClass = t.type === 'fee' ? 'pill-fee' : 'pill-est';
+  const dc = dueClass(t.dueDate);
+  const dl = dueLabel(t.dueDate);
+  const dueBadge = dc && dc !== 'due-later' ? `<span class="task-due-badge ${dc}-badge">${dl}</span>` : '';
+
+  // Sub-steps on card
+  const ss = t.substeps || [];
+  const prog = substepProgress(ss);
+  let ssHtml = '';
+  if (ss.length) {
+    const pct = Math.round((prog.done / prog.total) * 100);
+    ssHtml = `<div class="card-substep-progress">${prog.done}/${prog.total} steps</div>
+      <div class="progress-bar-wrap" style="margin-left:0;margin-bottom:6px"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <div class="card-substeps">
+        ${ss.map((s,si) => `<div class="card-substep">
+          <input type="checkbox" ${s.done?'checked':''} onchange="toggleSubstep('${t.jobId}','${t.id}','${t.type}',${si})">
+          <span class="${s.done?'done':''}">${esc(s.text)}</span>
+        </div>`).join('')}
+      </div>`;
+  }
+
+  return `<div class="task-card ${critClass} ${doneClass}">
+    <div class="task-text-main ${t.done?'done':''}">${esc(t.text)}</div>
+    ${ssHtml}
+    <div class="task-footer">
+      <span class="pill ${tagClass}">${esc(t.jobName)}</span>
+      ${t.critical && !t.done ? '<span class="pill pill-crit"><i class="ti ti-alert-triangle" style="font-size:10px;vertical-align:-1px"></i> Critical</span>' : ''}
+      ${dueBadge}
+      <div class="task-actions">
+        ${!t.done ? `<button class="icon-btn ${t.critical?'active-red':''}" onclick="toggleCritical('${t.jobId}','${t.id}','${t.type}')" title="${t.critical?'Remove critical':'Mark critical'}"><i class="ti ti-alert-triangle"></i></button>` : ''}
+        <button class="icon-btn" onclick="toggleDone('${t.jobId}','${t.id}','${t.type}')" title="${t.done?'Reopen':'Mark done'}"><i class="ti ti-${t.done?'rotate-clockwise':'check'}"></i></button>
+        <button class="icon-btn" onclick="removeTask('${t.jobId}','${t.id}','${t.type}')" title="Remove"><i class="ti ti-x"></i></button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function spClass(stage) { const i = FEE_STAGES.indexOf(stage); return SP_CLASS[i>=0?i:0]; }
+
+function renderFee() {
+  const el = document.getElementById('fee-list');
+  const fc = document.getElementById('fee-count');
+  if (!el) return;
+  if (fc) fc.textContent = data.fee.length + ' job' + (data.fee.length !== 1 ? 's' : '');
+  el.innerHTML = data.fee.length ? data.fee.map(j => jobRowHTML(j,'fee')).join('') : '<div class="empty-state"><i class="ti ti-briefcase"></i>No fee-paid jobs yet</div>';
+}
+
+function renderEst() {
+  const el = document.getElementById('est-list');
+  const ec = document.getElementById('est-count');
+  if (!el) return;
+  if (ec) ec.textContent = data.est.length + ' enquir' + (data.est.length!==1?'ies':'y');
+  el.innerHTML = data.est.length ? data.est.map(j => jobRowHTML(j,'est')).join('') : '<div class="empty-state"><i class="ti ti-calculator"></i>No estimating enquiries yet</div>';
+}
+
+function jobRowHTML(j, type) {
+  const isOpen = openJobs.has(j.id);
+  const tasks = j.tasks || [];
+  const todayCount = tasks.filter(t => t.today && !t.done).length;
+  const critCount = tasks.filter(t => t.critical && t.today && !t.done).length;
+  const isFee = type === 'fee';
+  const sc = isFee ? spClass(j.stage) : 'sp-0';
+  const pill = isFee ? j.stage : 'Estimating';
+
+  const taskRows = tasks.map(t => {
+    const ssOpen = openSubsteps.has(t.id);
+    const ss = t.substeps || [];
+    const prog = substepProgress(ss);
+    const dc = dueClass(t.dueDate);
+    const dl = dueLabel(t.dueDate);
+
+    let duePill = '';
+    if (dc && dc !== 'due-later') duePill = `<span class="jt-due ${dc}">${dl}</span>`;
+    else if (dc === 'due-later') duePill = `<span class="jt-due due-later">${dl}</span>`;
+
+    let ssSection = '';
+    if (ss.length || ssOpen) {
+      const pct = prog ? Math.round((prog.done / prog.total) * 100) : 0;
+      ssSection = `
+        ${prog ? `<div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>` : ''}
+        <div class="substeps" ${ssOpen?'':'style="display:none"'} id="ss-${t.id}">
+          ${ss.map((s,si) => `<div class="substep-row">
+            <input type="checkbox" class="substep-cb" ${s.done?'checked':''} onchange="toggleSubstep('${j.id}','${t.id}','${type}',${si})">
+            <span class="substep-text ${s.done?'done':''}">${esc(s.text)}</span>
+            <button class="substep-del" onclick="deleteSubstep('${j.id}','${t.id}','${type}',${si})" title="Remove step"><i class="ti ti-x"></i></button>
+          </div>`).join('')}
+          <div class="add-substep-row">
+            <input type="text" placeholder="Add step…" id="ssi-${t.id}" onkeydown="if(event.key==='Enter')addSubstep('${j.id}','${t.id}','${type}')">
+            <button class="btn btn-sm" onclick="addSubstep('${j.id}','${t.id}','${type}')"><i class="ti ti-plus"></i></button>
+          </div>
+        </div>
+        <button class="substep-toggle" onclick="toggleSubstepOpen('${t.id}')">
+          <i class="ti ti-${ssOpen?'chevron-up':'chevron-down'}" style="font-size:12px"></i>
+          ${ssOpen ? 'Hide steps' : (ss.length ? `${prog.done}/${prog.total} steps` : 'Add steps')}
+        </button>`;
+    } else {
+      ssSection = `<button class="substep-toggle" onclick="toggleSubstepOpen('${t.id}')"><i class="ti ti-plus" style="font-size:12px"></i>Add steps</button>`;
+    }
+
+    return `<div class="job-task-row">
+      <div class="jtr-top">
+        <input type="checkbox" class="task-cb" ${t.done?'checked':''} onchange="toggleDone('${j.id}','${t.id}','${type}')">
+        <span class="jt-text ${t.done?'done':''}">${esc(t.text)}</span>
+        <div style="display:flex;gap:3px;flex-shrink:0">
+          <button class="icon-btn ${t.critical?'active-red':''}" onclick="toggleCritical('${j.id}','${t.id}','${type}')" title="Toggle critical"><i class="ti ti-alert-triangle"></i></button>
+          <button class="icon-btn ${t.today?'active-amber':''}" onclick="toggleToday('${j.id}','${t.id}','${type}')" title="Toggle today"><i class="ti ti-calendar"></i></button>
+          <button class="icon-btn" onclick="showEditTask('${j.id}','${t.id}','${type}')" title="Set due date"><i class="ti ti-calendar-event"></i></button>
+          <button class="icon-btn" onclick="removeTask('${j.id}','${t.id}','${type}')" title="Remove"><i class="ti ti-x"></i></button>
+        </div>
+      </div>
+      <div class="jt-meta">
+        ${t.today ? '<span class="jt-pill jt-today">Today</span>' : ''}
+        ${t.critical && !t.done ? '<span class="jt-pill jt-critical">Critical</span>' : ''}
+        ${duePill}
+      </div>
+      ${ssSection}
+    </div>`;
+  }).join('');
+
+  return `<div class="job-row">
+    <div class="job-hdr" onclick="toggleJobOpen('${j.id}')">
+      <span class="stage-pill ${sc}">${esc(pill)}</span>
+      <span class="job-name-txt">${esc(j.name)}</span>
+      ${critCount > 0 ? `<span class="job-badge badge-crit"><i class="ti ti-alert-triangle" style="font-size:10px;vertical-align:-1px"></i> ${critCount}</span>` : ''}
+      ${todayCount > 0 && critCount === 0 ? `<span class="job-badge badge-today">${todayCount} today</span>` : ''}
+      <button class="icon-btn" onclick="event.stopPropagation();confirmDeleteJob('${j.id}','${type}')" title="Remove"><i class="ti ti-trash"></i></button>
+      <i class="ti ti-chevron-down chevron ${isOpen?'open':''}"></i>
+    </div>
+    <div class="job-body ${isOpen?'open':''}">
+      <div class="job-meta">
+        ${isFee ? `<select class="stage-select" onchange="changeStage('${j.id}',this.value)">${FEE_STAGES.map(s=>`<option ${s===j.stage?'selected':''}>${s}</option>`).join('')}</select>` : '<span style="font-size:12px;color:var(--text2)">Estimating enquiry</span>'}
+        ${!isFee ? `<button class="promote-btn" onclick="promoteToFee('${j.id}')"><i class="ti ti-arrow-up" style="font-size:12px;vertical-align:-1px"></i> Move to fee-paid</button>` : ''}
+      </div>
+      ${tasks.length ? `<div class="job-tasks">${taskRows}</div>` : '<div class="no-tasks">No tasks yet — add one below</div>'}
+      <div class="add-row">
+        <input type="text" placeholder="Type a task…" id="ti-${j.id}" onkeydown="if(event.key==='Enter')quickAdd('${j.id}','${type}',false,false)">
+        <button class="btn btn-sm" onclick="quickAdd('${j.id}','${type}',false,false)"><i class="ti ti-plus"></i>Add</button>
+        <button class="btn btn-sm btn-amber" onclick="quickAdd('${j.id}','${type}',true,false)"><i class="ti ti-calendar"></i>Today</button>
+        <button class="btn btn-sm btn-red" onclick="quickAdd('${j.id}','${type}',true,true)"><i class="ti ti-alert-triangle"></i>Critical</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleJobOpen(id) { if (openJobs.has(id)) openJobs.delete(id); else openJobs.add(id); renderAll(); }
+function toggleSubstepOpen(tid) {
+  if (openSubsteps.has(tid)) openSubsteps.delete(tid); else openSubsteps.add(tid);
+  renderAll();
+}
+
+function getArr(type) { return type === 'fee' ? data.fee : data.est; }
+function getJob(id, type) { return getArr(type).find(j => j.id === id); }
+function getTask(job, tid) { return (job.tasks||[]).find(t => t.id === tid); }
+
+function toggleDone(jid, tid, type) {
+  const j = getJob(jid,type); if (!j) return;
+  const t = getTask(j,tid); if (t) { t.done = !t.done; save(); renderAll(); }
+}
+function toggleCritical(jid, tid, type) {
+  const j = getJob(jid,type); if (!j) return;
+  const t = getTask(j,tid); if (t) { t.critical = !t.critical; if (t.critical) t.today = true; save(); renderAll(); }
+}
+function toggleToday(jid, tid, type) {
+  const j = getJob(jid,type); if (!j) return;
+  const t = getTask(j,tid); if (t) { t.today = !t.today; if (!t.today) t.critical = false; save(); renderAll(); }
+}
+function removeTask(jid, tid, type) {
+  const j = getJob(jid,type); if (!j) return;
+  j.tasks = (j.tasks||[]).filter(t => t.id !== tid); save(); renderAll();
+}
+function changeStage(id, val) {
+  const j = data.fee.find(j => j.id === id); if (j) { j.stage = val; save(); renderAll(); }
+}
+
+function addSubstep(jid, tid, type) {
+  const inp = document.getElementById('ssi-' + tid);
+  const text = (inp ? inp.value : '').trim(); if (!text) { inp && inp.focus(); return; }
+  const j = getJob(jid,type); if (!j) return;
+  const t = getTask(j,tid); if (!t) return;
+  if (!t.substeps) t.substeps = [];
+  t.substeps.push({ id: 's'+Date.now(), text, done: false });
+  openSubsteps.add(tid);
+  inp.value = ''; save(); renderAll();
+}
+function toggleSubstep(jid, tid, type, si) {
+  const j = getJob(jid,type); if (!j) return;
+  const t = getTask(j,tid); if (!t || !t.substeps) return;
+  t.substeps[si].done = !t.substeps[si].done;
+  save(); renderAll();
+}
+function deleteSubstep(jid, tid, type, si) {
+  const j = getJob(jid,type); if (!j) return;
+  const t = getTask(j,tid); if (!t || !t.substeps) return;
+  t.substeps.splice(si,1); save(); renderAll();
+}
+
+function quickAdd(jid, type, today=false, critical=false) {
+  const inp = document.getElementById('ti-'+jid);
+  const text = (inp ? inp.value : '').trim(); if (!text) { inp && inp.focus(); return; }
+  const j = getJob(jid,type); if (!j) return;
+  if (!j.tasks) j.tasks = [];
+  j.tasks.push({ id:'t'+Date.now(), text, done:false, today, critical, dueDate:'', substeps:[] });
+  inp.value = ''; save(); openJobs.add(jid); renderAll();
+}
+
+function showEditTask(jid, tid, type) {
+  const j = getJob(jid,type); if (!j) return;
+  const t = getTask(j,tid); if (!t) return;
+  document.getElementById('modal-area').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3><i class="ti ti-calendar-event" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Set due date</h3>
+        <label>Task</label>
+        <div style="font-size:13px;font-weight:500;margin-bottom:14px;color:var(--text)">${esc(t.text)}</div>
+        <label>Target due date</label>
+        <input type="date" id="edit-due" value="${t.dueDate||''}">
+        <div class="modal-hint">Tasks due within 7 days appear on the dashboard. Due today or overdue show as critical alerts.</div>
+        <div class="modal-btns">
+          ${t.dueDate ? `<button class="btn btn-red btn-sm" onclick="clearDue('${jid}','${tid}','${type}')"><i class="ti ti-x"></i>Clear date</button>` : ''}
+          <button class="btn" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-dark" onclick="saveDue('${jid}','${tid}','${type}')"><i class="ti ti-check"></i>Save</button>
+        </div>
+      </div>
+    </div>`;
+}
+function saveDue(jid, tid, type) {
+  const j = getJob(jid,type); if (!j) return;
+  const t = getTask(j,tid); if (!t) return;
+  t.dueDate = document.getElementById('edit-due').value;
+  save(); closeModal(); renderAll();
+}
+function clearDue(jid, tid, type) {
+  const j = getJob(jid,type); if (!j) return;
+  const t = getTask(j,tid); if (!t) return;
+  t.dueDate = '';
+  save(); closeModal(); renderAll();
+}
+
+function showAddTask() {
+  const allJobs = [...data.fee.map(j=>({...j,type:'fee'})),...data.est.map(j=>({...j,type:'est'}))];
+  if (!allJobs.length) { alert('Add a job or enquiry first.'); return; }
+  document.getElementById('modal-area').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>Add task to daily board</h3>
+        <label>Task description</label>
+        <input id="mt-text" placeholder="What needs doing?" autofocus>
+        <label>Job</label>
+        <select id="mt-job">${allJobs.map(j=>`<option value="${j.id}|${j.type}">${esc(j.name)}${j.type==='est'?' (est)':''}</option>`).join('')}</select>
+        <label>Priority</label>
+        <select id="mt-priority"><option value="today">Today — on the to-do list</option><option value="critical">Critical — must action today</option></select>
+        <label>Due date (optional)</label>
+        <input type="date" id="mt-due">
+        <div class="modal-hint">If due within 7 days, it will appear in the upcoming deadlines strip.</div>
+        <div class="modal-btns">
+          <button class="btn" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-dark" onclick="saveQuickTask()"><i class="ti ti-plus"></i>Add to board</button>
+        </div>
+      </div>
+    </div>`;
+}
+function saveQuickTask() {
+  const text = document.getElementById('mt-text').value.trim();
+  if (!text) { document.getElementById('mt-text').focus(); return; }
+  const [jid,type] = document.getElementById('mt-job').value.split('|');
+  const priority = document.getElementById('mt-priority').value;
+  const dueDate = document.getElementById('mt-due').value;
+  const j = getJob(jid,type); if (!j) return;
+  if (!j.tasks) j.tasks = [];
+  j.tasks.push({ id:'t'+Date.now(), text, done:false, today:true, critical:priority==='critical', dueDate, substeps:[] });
+  save(); closeModal(); switchTab('dashboard'); renderAll();
+}
+
+function showAddJob(type) {
+  const isFee = type==='fee';
+  document.getElementById('modal-area').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>${isFee?'New fee-paid job':'New estimating enquiry'}</h3>
+        <label>${isFee?'Job reference':'Client / project name'}</label>
+        <input id="mj-name" placeholder="${isFee?'e.g. 99JONES':'e.g. Brown – extension'}" autofocus>
+        ${isFee?`<label>Stage</label><select id="mj-stage">${FEE_STAGES.map(s=>`<option>${s}</option>`).join('')}</select>`:''}
+        <div class="modal-btns">
+          <button class="btn" onclick="closeModal()">Cancel</button>
+          <button class="btn ${isFee?'btn-blue':'btn-green'}" onclick="saveJob('${type}')"><i class="ti ti-plus"></i>${isFee?'Add job':'Add enquiry'}</button>
+        </div>
+      </div>
+    </div>`;
+}
+function saveJob(type) {
+  const name = document.getElementById('mj-name').value.trim();
+  if (!name) { document.getElementById('mj-name').focus(); return; }
+  const id = 'j'+Date.now();
+  if (type==='fee') { const stage = document.getElementById('mj-stage').value; data.fee.push({id,name,stage,tasks:[]}); }
+  else { data.est.push({id,name,tasks:[]}); }
+  openJobs.add(id); save(); closeModal();
+  switchTab(type==='fee'?'jobs':'estimating');
+}
+
+function confirmDeleteJob(id, type) {
+  const j = getJob(id,type); if (!j) return;
+  document.getElementById('modal-area').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+      <div class="confirm-box">
+        <p>Remove <strong>${esc(j.name)}</strong>? This cannot be undone.</p>
+        <div class="confirm-btns">
+          <button class="btn" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-red" onclick="deleteJob('${id}','${type}')"><i class="ti ti-trash"></i>Remove</button>
+        </div>
+      </div>
+    </div>`;
+}
+function deleteJob(id, type) {
+  if (type==='fee') data.fee = data.fee.filter(j=>j.id!==id);
+  else data.est = data.est.filter(j=>j.id!==id);
+  openJobs.delete(id); save(); closeModal(); renderAll();
+}
+function promoteToFee(id) {
+  const j = data.est.find(j=>j.id===id); if (!j) return;
+  document.getElementById('modal-area').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+      <div class="confirm-box">
+        <p>Move <strong>${esc(j.name)}</strong> to fee-paid jobs?</p>
+        <div class="confirm-btns">
+          <button class="btn" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-green" onclick="doPromote('${id}')"><i class="ti ti-arrow-up"></i>Move to fee-paid</button>
+        </div>
+      </div>
+    </div>`;
+}
+function doPromote(id) {
+  const j = data.est.find(j=>j.id===id); if (!j) return;
+  data.est = data.est.filter(e=>e.id!==id);
+  j.stage = 'Estimating'; data.fee.push(j);
+  openJobs.add(id); save(); closeModal(); switchTab('jobs');
+}
+
+function closeModal() { document.getElementById('modal-area').innerHTML = ''; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+loadData();
+</script>
+</body>
+</html>
