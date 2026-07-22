@@ -55,7 +55,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .nav-btn:hover { color: var(--text); }
 .nav-btn.active { color: var(--text); border-bottom-color: var(--text); }
 .nav-btn i { font-size: 15px; }
+.seg { display:flex; border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-right:auto; }
+.seg-btn { padding:6px 12px; font-size:12px; font-weight:500; background:var(--surface); color:var(--text2); border:none; border-right:1px solid var(--border); cursor:pointer; font-family:'DM Sans',sans-serif; }
+.seg-btn:last-child { border-right:none; }
+.seg-btn.active { background:var(--text); color:#fff; }
+.jt-assignee, .task-assignee-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; background:var(--purple-bg); color:var(--purple); border:1px solid var(--purple-border); white-space:nowrap; }
+.staff-row { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--border); }
+.staff-row:last-child { border-bottom:none; }
+.staff-row span { flex:1; font-size:13px; font-weight:500; }
 .sync-chip { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text2); font-family:'DM Mono',monospace; white-space:nowrap; }
+#lbb-toast { transition: opacity 0.3s ease; }
 .sync-dot { width:8px; height:8px; border-radius:50%; background:var(--green); flex-shrink:0; }
 .sync-dot.syncing { background:var(--amber); }
 .sync-dot.error { background:var(--red); }
@@ -270,6 +279,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <button class="nav-btn" onclick="switchTab('estimating')" id="tab-estimating"><i class="ti ti-calculator"></i>Estimating</button>
     </nav>
     <div class="header-right">
+      <button class="btn btn-sm" onclick="showManageStaff()"><i class="ti ti-users"></i>Team</button>
       <span class="sync-chip"><span class="sync-dot syncing" id="syncDot"></span><span id="syncLabel">Connecting</span></span>
       <span class="date-chip" id="date-chip"></span>
     </div>
@@ -314,6 +324,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="view-topbar">
         <span class="view-title"><i class="ti ti-receipt" style="font-size:18px;vertical-align:-3px;margin-right:6px"></i>Fee-paid jobs</span>
         <span style="font-size:13px;color:var(--text2)" id="fee-count"></span>
+        <div class="seg" id="fee-filter-seg">
+          <button class="seg-btn active" onclick="setTaskFilter('fee','all')" data-v="all">All</button>
+          <button class="seg-btn" onclick="setTaskFilter('fee','active')" data-v="active">Active</button>
+          <button class="seg-btn" onclick="setTaskFilter('fee','done')" data-v="done">Completed</button>
+        </div>
         <button class="btn btn-blue" onclick="showAddJob('fee')"><i class="ti ti-plus"></i>Add job</button>
       </div>
       <div class="jobs-list" id="fee-list"></div>
@@ -324,6 +339,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="view-topbar">
         <span class="view-title"><i class="ti ti-calculator" style="font-size:18px;vertical-align:-3px;margin-right:6px"></i>Estimating enquiries</span>
         <span style="font-size:13px;color:var(--text2)" id="est-count"></span>
+        <div class="seg" id="est-filter-seg">
+          <button class="seg-btn active" onclick="setTaskFilter('est','all')" data-v="all">All</button>
+          <button class="seg-btn" onclick="setTaskFilter('est','active')" data-v="active">Active</button>
+          <button class="seg-btn" onclick="setTaskFilter('est','done')" data-v="done">Completed</button>
+        </div>
         <button class="btn btn-green" onclick="showAddJob('est')"><i class="ti ti-plus"></i>Add enquiry</button>
       </div>
       <div class="jobs-list" id="est-list"></div>
@@ -352,7 +372,8 @@ const DEFAULT_DATA = {
     {id:'j7',name:'8FLORENCE',stage:'Building permit / site ready',tasks:[]},
     {id:'j8',name:'11TUX',stage:'Building permit / site ready',tasks:[]}
   ],
-  est: []
+  est: [],
+  staff: []
 };
 
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -423,10 +444,12 @@ async function loadData(isPoll) {
     if (!res.ok) throw new Error('load failed');
     const d = await res.json();
     if (d.record && d.record.fee) data = d.record;
+    if (!data.staff) data.staff = [];
     setSync('ok');
   } catch(e) {
     // Offline fallback: use local cache so the board still opens
     try { const s = localStorage.getItem('lean_bldr_v2'); if (s) { const parsed = JSON.parse(s); if (parsed && parsed.fee) data = parsed; } } catch(_) {}
+    if (!data.staff) data.staff = [];
     setSync('error');
   }
   const ov = document.getElementById('loadingOverlay');
@@ -606,6 +629,7 @@ function taskCardHTML(t) {
     <div class="task-footer">
       <span class="pill ${tagClass}">${esc(t.jobName)}</span>
       ${t.critical && !t.done ? '<span class="pill pill-crit"><i class="ti ti-alert-triangle" style="font-size:10px;vertical-align:-1px"></i> Critical</span>' : ''}
+      ${t.assignee ? `<span class="task-assignee-badge"><i class="ti ti-user" style="font-size:10px"></i>${esc(t.assignee)}</span>` : ''}
       ${dueBadge}
       <div class="task-actions">
         ${!t.done ? `<button class="icon-btn ${t.critical?'active-red':''}" onclick="toggleCritical('${t.jobId}','${t.id}','${t.type}')" title="${t.critical?'Remove critical':'Mark critical'}"><i class="ti ti-alert-triangle"></i></button>` : ''}
@@ -634,11 +658,20 @@ function renderEst() {
   el.innerHTML = data.est.length ? data.est.map(j => jobRowHTML(j,'est')).join('') : '<div class="empty-state"><i class="ti ti-calculator"></i>No estimating enquiries yet</div>';
 }
 
+let taskFilters = { fee: 'all', est: 'all' };
+function setTaskFilter(type, val) {
+  taskFilters[type] = val;
+  document.querySelectorAll('#' + type + '-filter-seg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === val));
+  type === 'fee' ? renderFee() : renderEst();
+}
+
 function jobRowHTML(j, type) {
   const isOpen = openJobs.has(j.id);
-  const tasks = j.tasks || [];
-  const todayCount = tasks.filter(t => t.today && !t.done).length;
-  const critCount = tasks.filter(t => t.critical && t.today && !t.done).length;
+  const allJobTasks = j.tasks || [];
+  const filter = taskFilters[type] || 'all';
+  const tasks = filter === 'active' ? allJobTasks.filter(t => !t.done) : filter === 'done' ? allJobTasks.filter(t => t.done) : allJobTasks;
+  const todayCount = allJobTasks.filter(t => t.today && !t.done).length;
+  const critCount = allJobTasks.filter(t => t.critical && t.today && !t.done).length;
   const isFee = type === 'fee';
   const sc = isFee ? spClass(j.stage) : 'sp-0';
   const pill = isFee ? j.stage : 'Estimating';
@@ -685,7 +718,8 @@ function jobRowHTML(j, type) {
         <div style="display:flex;gap:3px;flex-shrink:0">
           <button class="icon-btn ${t.critical?'active-red':''}" onclick="toggleCritical('${j.id}','${t.id}','${type}')" title="Toggle critical"><i class="ti ti-alert-triangle"></i></button>
           <button class="icon-btn ${t.today?'active-amber':''}" onclick="toggleToday('${j.id}','${t.id}','${type}')" title="Toggle today"><i class="ti ti-calendar"></i></button>
-          <button class="icon-btn" onclick="showEditTask('${j.id}','${t.id}','${type}')" title="Set due date"><i class="ti ti-calendar-event"></i></button>
+          <button class="icon-btn" onclick="showEditTask('${j.id}','${t.id}','${type}')" title="Edit task"><i class="ti ti-pencil"></i></button>
+          ${t.dueDate ? `<button class="icon-btn" onclick="addToCalendar('${j.id}','${t.id}','${type}')" title="Add reminder to Outlook/Teams calendar"><i class="ti ti-bell"></i></button>` : ''}
           <button class="icon-btn" onclick="removeTask('${j.id}','${t.id}','${type}')" title="Remove"><i class="ti ti-x"></i></button>
         </div>
       </div>
@@ -693,6 +727,7 @@ function jobRowHTML(j, type) {
         ${t.today ? '<span class="jt-pill jt-today">Today</span>' : ''}
         ${t.critical && !t.done ? '<span class="jt-pill jt-critical">Critical</span>' : ''}
         ${duePill}
+        ${t.assignee ? `<span class="jt-assignee"><i class="ti ti-user" style="font-size:10px"></i>${esc(t.assignee)}</span>` : ''}
       </div>
       ${ssSection}
     </div>`;
@@ -712,7 +747,7 @@ function jobRowHTML(j, type) {
         ${isFee ? `<select class="stage-select" onchange="changeStage('${j.id}',this.value)">${FEE_STAGES.map(s=>`<option ${s===j.stage?'selected':''}>${s}</option>`).join('')}</select>` : '<span style="font-size:12px;color:var(--text2)">Estimating enquiry</span>'}
         ${!isFee ? `<button class="promote-btn" onclick="promoteToFee('${j.id}')"><i class="ti ti-arrow-up" style="font-size:12px;vertical-align:-1px"></i> Move to fee-paid</button>` : ''}
       </div>
-      ${tasks.length ? `<div class="job-tasks">${taskRows}</div>` : '<div class="no-tasks">No tasks yet — add one below</div>'}
+      ${tasks.length ? `<div class="job-tasks">${taskRows}</div>` : `<div class="no-tasks">${allJobTasks.length ? 'No tasks match this filter' : 'No tasks yet — add one below'}</div>`}
       <div class="add-row">
         <input type="text" placeholder="Type a task…" id="ti-${j.id}" onkeydown="if(event.key==='Enter')quickAdd('${j.id}','${type}',false,false)">
         <button class="btn btn-sm" onclick="quickAdd('${j.id}','${type}',false,false)"><i class="ti ti-plus"></i>Add</button>
@@ -780,33 +815,55 @@ function quickAdd(jid, type, today=false, critical=false) {
   const text = (inp ? inp.value : '').trim(); if (!text) { inp && inp.focus(); return; }
   const j = getJob(jid,type); if (!j) return;
   if (!j.tasks) j.tasks = [];
-  j.tasks.push({ id:'t'+Date.now(), text, done:false, today, critical, dueDate:'', substeps:[] });
+  j.tasks.push({ id:'t'+Date.now(), text, done:false, today, critical, dueDate:'', assignee:'', substeps:[] });
   inp.value = ''; save(); openJobs.add(jid); renderAll();
 }
 
 function showEditTask(jid, tid, type) {
   const j = getJob(jid,type); if (!j) return;
   const t = getTask(j,tid); if (!t) return;
+  const staff = data.staff || [];
   document.getElementById('modal-area').innerHTML = `
     <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
       <div class="modal">
-        <h3><i class="ti ti-calendar-event" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Set due date</h3>
-        <label>Task</label>
-        <div style="font-size:13px;font-weight:500;margin-bottom:14px;color:var(--text)">${esc(t.text)}</div>
+        <h3><i class="ti ti-pencil" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Edit task</h3>
+        <label>Task description</label>
+        <input id="edit-text" value="${esc(t.text)}">
+        <label>Assigned to</label>
+        <select id="edit-assignee">
+          <option value="">Unassigned</option>
+          ${staff.map(s => `<option value="${esc(s)}" ${t.assignee===s?'selected':''}>${esc(s)}</option>`).join('')}
+        </select>
+        ${!staff.length ? `<div class="modal-hint">No staff added yet — click <strong>Team</strong> in the top bar to add names.</div>` : ''}
         <label>Target due date</label>
         <input type="date" id="edit-due" value="${t.dueDate||''}">
         <div class="modal-hint">Tasks due within 7 days appear on the dashboard. Due today or overdue show as critical alerts.</div>
+        ${t.dueDate ? `
+        <label>Reminder time on due date</label>
+        <select id="edit-reminder-time">
+          <option value="07:00">7:00 AM</option>
+          <option value="08:00" selected>8:00 AM</option>
+          <option value="09:00">9:00 AM</option>
+          <option value="12:00">12:00 PM</option>
+          <option value="15:00">3:00 PM</option>
+        </select>
+        ` : ''}
         <div class="modal-btns">
           ${t.dueDate ? `<button class="btn btn-red btn-sm" onclick="clearDue('${jid}','${tid}','${type}')"><i class="ti ti-x"></i>Clear date</button>` : ''}
+          ${t.dueDate ? `<button class="btn btn-sm" onclick="addToCalendar('${jid}','${tid}','${type}')"><i class="ti ti-bell"></i>Add reminder</button>` : ''}
           <button class="btn" onclick="closeModal()">Cancel</button>
-          <button class="btn btn-dark" onclick="saveDue('${jid}','${tid}','${type}')"><i class="ti ti-check"></i>Save</button>
+          <button class="btn btn-dark" onclick="saveTaskEdit('${jid}','${tid}','${type}')"><i class="ti ti-check"></i>Save</button>
         </div>
       </div>
     </div>`;
 }
-function saveDue(jid, tid, type) {
+function saveTaskEdit(jid, tid, type) {
   const j = getJob(jid,type); if (!j) return;
   const t = getTask(j,tid); if (!t) return;
+  const text = document.getElementById('edit-text').value.trim();
+  if (!text) { document.getElementById('edit-text').focus(); return; }
+  t.text = text;
+  t.assignee = document.getElementById('edit-assignee').value;
   t.dueDate = document.getElementById('edit-due').value;
   save(); closeModal(); renderAll();
 }
@@ -814,7 +871,84 @@ function clearDue(jid, tid, type) {
   const j = getJob(jid,type); if (!j) return;
   const t = getTask(j,tid); if (!t) return;
   t.dueDate = '';
-  save(); closeModal(); renderAll();
+  save(); renderAll();
+  showEditTask(jid, tid, type);
+}
+
+function icsEsc(s) { return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+function addToCalendar(jid, tid, type) {
+  const j = getJob(jid,type); if (!j) return;
+  const t = getTask(j,tid); if (!t || !t.dueDate) return;
+  const timeSel = document.getElementById('edit-reminder-time');
+  const time = timeSel ? timeSel.value : '08:00';
+  const [hh, mm] = time.split(':');
+  const startdt = `${t.dueDate}T${hh}:${mm}:00`;
+  let endMinTotal = Number(hh)*60 + Number(mm) + 30;
+  const endH = String(Math.floor(endMinTotal/60)).padStart(2,'0');
+  const endM = String(endMinTotal%60).padStart(2,'0');
+  const enddt = `${t.dueDate}T${endH}:${endM}:00`;
+  const subject = j.name + ' — ' + t.text;
+  const body = (t.assignee ? 'Assigned to: ' + t.assignee + '. ' : '') + 'From the Lean Builder Board' + (t.critical ? ' (Critical)' : '');
+  const params = new URLSearchParams({
+    path: '/calendar/action/compose', rru: 'addevent',
+    startdt, enddt, subject, body, allday: 'false'
+  });
+  const url = 'https://outlook.office.com/calendar/0/deeplink/compose?' + params.toString();
+  window.open(url, '_blank');
+  showToast('Opening Outlook — click Save to add the reminder');
+}
+function showToast(msg) {
+  let el = document.getElementById('lbb-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'lbb-toast';
+    el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-family:\'DM Sans\',sans-serif;z-index:1200;box-shadow:var(--shadow)';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(window._lbbToastTimer);
+  window._lbbToastTimer = setTimeout(() => { el.style.opacity = '0'; }, 3200);
+}
+
+function showManageStaff() {
+  if (!data.staff) data.staff = [];
+  document.getElementById('modal-area').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3><i class="ti ti-users" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Team</h3>
+        <div id="staff-list">${staffListHTML()}</div>
+        <div class="add-row" style="margin-top:10px">
+          <input type="text" placeholder="Add staff member…" id="new-staff-name" onkeydown="if(event.key==='Enter')addStaff()">
+          <button class="btn btn-sm btn-dark" onclick="addStaff()"><i class="ti ti-plus"></i>Add</button>
+        </div>
+        <div class="modal-btns">
+          <button class="btn" onclick="closeModal()">Done</button>
+        </div>
+      </div>
+    </div>`;
+}
+function staffListHTML() {
+  const staff = data.staff || [];
+  if (!staff.length) return '<div class="col-empty">No staff added yet</div>';
+  return staff.map((s,i) => `<div class="staff-row"><i class="ti ti-user" style="color:var(--text3)"></i><span>${esc(s)}</span><button class="icon-btn" onclick="removeStaff(${i})" title="Remove"><i class="ti ti-x"></i></button></div>`).join('');
+}
+function addStaff() {
+  const inp = document.getElementById('new-staff-name');
+  const name = (inp.value || '').trim();
+  if (!name) { inp.focus(); return; }
+  if (!data.staff) data.staff = [];
+  if (data.staff.includes(name)) { inp.value = ''; return; }
+  data.staff.push(name);
+  save();
+  inp.value = '';
+  document.getElementById('staff-list').innerHTML = staffListHTML();
+}
+function removeStaff(i) {
+  data.staff.splice(i,1);
+  save();
+  document.getElementById('staff-list').innerHTML = staffListHTML();
+  renderAll();
 }
 
 function showAddTask() {
@@ -830,6 +964,8 @@ function showAddTask() {
         <select id="mt-job">${allJobs.map(j=>`<option value="${j.id}|${j.type}">${esc(j.name)}${j.type==='est'?' (est)':''}</option>`).join('')}</select>
         <label>Priority</label>
         <select id="mt-priority"><option value="today">Today — on the to-do list</option><option value="critical">Critical — must action today</option></select>
+        <label>Assigned to</label>
+        <select id="mt-assignee"><option value="">Unassigned</option>${(data.staff||[]).map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('')}</select>
         <label>Due date (optional)</label>
         <input type="date" id="mt-due">
         <div class="modal-hint">If due within 7 days, it will appear in the upcoming deadlines strip.</div>
@@ -845,10 +981,11 @@ function saveQuickTask() {
   if (!text) { document.getElementById('mt-text').focus(); return; }
   const [jid,type] = document.getElementById('mt-job').value.split('|');
   const priority = document.getElementById('mt-priority').value;
+  const assignee = document.getElementById('mt-assignee').value;
   const dueDate = document.getElementById('mt-due').value;
   const j = getJob(jid,type); if (!j) return;
   if (!j.tasks) j.tasks = [];
-  j.tasks.push({ id:'t'+Date.now(), text, done:false, today:true, critical:priority==='critical', dueDate, substeps:[] });
+  j.tasks.push({ id:'t'+Date.now(), text, done:false, today:true, critical:priority==='critical', dueDate, assignee, substeps:[] });
   save(); closeModal(); switchTab('dashboard'); renderAll();
 }
 
