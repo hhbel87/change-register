@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lean Builder Board</title>
+<title>Hotondo Homes Belmont - Action List</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -49,6 +49,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   position: sticky; top: 0; z-index: 100;
 }
 .logo { font-family: 'DM Mono', monospace; font-weight: 500; font-size: 13px; letter-spacing: 0.08em; color: var(--text); text-transform: uppercase; padding: 16px 0; margin-right: 32px; white-space: nowrap; }
+.logo-short { display: none; }
 .logo span { color: var(--red); }
 .nav { display: flex; gap: 0; flex: 1; }
 .nav-btn { padding: 20px 18px; font-size: 13px; font-weight: 500; color: var(--text2); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; transition: color 0.15s; white-space: nowrap; font-family: 'DM Sans', sans-serif; }
@@ -60,6 +61,63 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .seg-btn:last-child { border-right:none; }
 .seg-btn.active { background:var(--text); color:#fff; }
 .jt-assignee, .task-assignee-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; background:var(--purple-bg); color:var(--purple); border:1px solid var(--purple-border); white-space:nowrap; }
+.week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:10px; align-items:start; }
+.week-day { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px; min-height:120px; }
+.week-day.is-today { border-color:var(--text); box-shadow:0 0 0 1px var(--text); }
+.week-day-head { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text2); margin-bottom:2px; }
+.week-day-date { font-size:15px; font-weight:600; color:var(--text); margin-bottom:8px; }
+.week-task { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:6px 8px; margin-bottom:6px; font-size:12px; }
+.week-task.wt-done { opacity:0.5; text-decoration:line-through; }
+.week-task.wt-critical { border-left:3px solid var(--red); }
+.week-task-job { font-size:10px; color:var(--text3); font-weight:600; text-transform:uppercase; margin-bottom:2px; }
+.week-task-meta { display:flex; align-items:center; gap:5px; margin-top:4px; flex-wrap:wrap; }
+.week-empty { font-size:11px; color:var(--text3); padding:6px 0; }
+.team-snapshot { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:14px 18px; margin-bottom:16px; }
+.ts-row { display:grid; grid-template-columns:1.4fr repeat(3,0.8fr); align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px; }
+.ts-row:last-child { border-bottom:none; }
+.ts-row.ts-head { font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text3); letter-spacing:0.03em; }
+.ts-name { font-weight:500; }
+.ts-num { text-align:center; font-family:'DM Mono',monospace; font-weight:600; }
+.ts-num.ts-overdue { color:var(--red); }
+.ts-num.ts-zero { color:var(--text3); font-weight:400; }
+.pillars-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.pillar-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:18px; display:flex; flex-direction:column; gap:10px; }
+.pillar-card.pc-held { border-left:4px solid var(--green); }
+.pillar-card.pc-missed { border-left:4px solid var(--red); }
+.pillar-card.pc-pending { border-left:4px solid var(--amber); }
+.pillar-head { display:flex; align-items:center; justify-content:space-between; }
+.pillar-title { font-size:15px; font-weight:600; color:var(--text); }
+.pillar-day { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:0.03em; font-weight:600; }
+.pillar-desc { font-size:12px; color:var(--text2); }
+.pillar-status { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; width:fit-content; }
+.pillar-status.st-held { background:var(--green-bg); color:var(--green); }
+.pillar-status.st-missed { background:var(--red-bg); color:var(--red); }
+.pillar-status.st-pending { background:var(--amber-bg); color:var(--amber); }
+.pillar-lastheld { font-size:11px; color:var(--text3); }
+.pillar-checklist { border-top:1px solid var(--border); padding-top:10px; margin-top:2px; max-height:340px; overflow-y:auto; }
+.pillar-job-item { border-bottom:1px solid var(--border); }
+.pillar-job-item:last-child { border-bottom:none; }
+.pillar-job-row { display:flex; align-items:center; gap:6px; padding:7px 2px; font-size:12px; color:var(--text); cursor:pointer; }
+.pillar-job-body { padding:0 2px 12px 20px; }
+.pillar-job-tasks { display:flex; flex-direction:column; gap:3px; margin-bottom:4px; }
+.pillar-job-task { font-size:11px; color:var(--text2); padding:2px 0; }
+.pillar-job-tasks-empty { font-size:11px; color:var(--text3); padding:2px 0; }
+.pillar-notes { width:100%; min-height:56px; font-size:12px; font-family:'DM Sans',sans-serif; border:1px solid var(--border); border-radius:7px; padding:7px 9px; background:var(--bg); color:var(--text); resize:vertical; }
+.pillar-history { border-top:1px solid var(--border); margin-top:2px; padding-top:8px; max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+.pillar-history-entry { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:8px 10px; }
+.pillar-history-head { font-size:11px; font-weight:700; color:var(--text2); margin-bottom:3px; }
+.pillar-history-notes { font-size:12px; color:var(--text); white-space:pre-wrap; }
+.pillar-history-empty { font-size:11px; color:var(--text3); padding:6px 0; }
+.pillar-check-item { font-size:12px; padding:5px 0; display:flex; align-items:center; gap:6px; color:var(--text); border-bottom:1px solid var(--border); }
+.pillar-check-item:last-child { border-bottom:none; }
+@media (max-width: 900px) { .pillars-grid { grid-template-columns:1fr; } }
+.pillars-strip { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.pillar-chip { display:flex; align-items:center; gap:7px; padding:8px 14px; border-radius:10px; border:1px solid var(--border); background:var(--surface); font-size:12px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; }
+.pillar-chip.pcm-held { border-color:var(--green); color:var(--green); }
+.pillar-chip.pcm-missed { border-color:var(--red); color:var(--red); background:var(--red-bg); }
+.pillar-chip.pcm-pending { border-color:var(--amber); color:var(--amber); }
+@media (max-width: 900px) { .week-grid { grid-template-columns:repeat(2,1fr); } }
+@media (max-width: 550px) { .week-grid { grid-template-columns:1fr; } }
 .staff-row { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--border); }
 .staff-row:last-child { border-bottom:none; }
 .staff-row span { flex:1; font-size:13px; font-weight:500; }
@@ -101,7 +159,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 /* Dashboard */
 .dash-topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
 .dash-title { font-size: 20px; font-weight: 600; flex: 1; }
-.metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 28px; }
+.metrics { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 28px; }
 .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
 .metric-card.red { border-left: 3px solid var(--red); }
 .metric-card.amber { border-left: 3px solid #d4a000; }
@@ -137,7 +195,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .dc-date.week { color: var(--amber); }
 .dc-date.later { color: var(--text3); }
 
-.kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
+.kanban { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; align-items: start; }
 .kanban-col { display: flex; flex-direction: column; gap: 8px; }
 .col-header { display: flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: var(--radius); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
 .col-header i { font-size: 13px; }
@@ -260,11 +318,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .confirm-box .confirm-btns { display: flex; gap: 8px; justify-content: center; }
 
 @media (max-width: 750px) {
-  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .metrics { grid-template-columns: repeat(3, 1fr); }
   .kanban { grid-template-columns: 1fr; }
   .main { padding: 16px; }
   .header { padding: 0 14px; }
   .logo { margin-right: 14px; font-size: 12px; }
+  .logo-full { display: none; }
+  .logo-short { display: inline; }
   .nav-btn { padding: 18px 12px; font-size: 12px; }
 }
 </style>
@@ -272,11 +332,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 <body>
 <div class="app">
   <header class="header">
-    <div class="logo">LEAN<span>.</span>BUILD</div>
+    <div class="logo"><span class="logo-full">HOTONDO HOMES BELMONT — ACTION LIST</span><span class="logo-short">HHB ACTION LIST</span></div>
     <nav class="nav">
       <button class="nav-btn active" onclick="switchTab('dashboard')" id="tab-dashboard"><i class="ti ti-layout-board"></i>Daily board</button>
+      <button class="nav-btn" onclick="switchTab('week')" id="tab-week"><i class="ti ti-calendar-week"></i>This week</button>
       <button class="nav-btn" onclick="switchTab('jobs')" id="tab-jobs"><i class="ti ti-briefcase"></i>Jobs</button>
-      <button class="nav-btn" onclick="switchTab('estimating')" id="tab-estimating"><i class="ti ti-calculator"></i>Estimating</button>
+      <button class="nav-btn" onclick="switchTab('estimating')" id="tab-estimating"><i class="ti ti-calculator"></i>Sales & Estimating</button>
+      <button class="nav-btn" onclick="switchTab('pillars')" id="tab-pillars"><i class="ti ti-shield-check"></i>Non-negotiables</button>
     </nav>
     <div class="header-right">
       <button class="btn btn-sm" onclick="showManageStaff()"><i class="ti ti-users"></i>Team</button>
@@ -290,18 +352,29 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="view active" id="view-dashboard">
       <div class="dash-topbar">
         <span class="dash-title">Today's work</span>
+        <select id="dash-person-filter" onchange="setPersonFilter('dash', this.value)" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;margin-left:auto"></select>
         <button class="btn btn-dark" onclick="showAddTask()"><i class="ti ti-plus"></i>Add task to board</button>
       </div>
+      <div class="pillars-strip" id="pillars-strip"></div>
       <div class="metrics">
+        <div class="metric-card red" style="border-left-width:4px"><div class="metric-val" id="m-missed">0</div><div class="metric-label">Overdue</div></div>
         <div class="metric-card red"><div class="metric-val" id="m-critical">0</div><div class="metric-label">Critical</div></div>
         <div class="metric-card amber"><div class="metric-val" id="m-todo">0</div><div class="metric-label">To do today</div></div>
         <div class="metric-card orange"><div class="metric-val" id="m-upcoming">0</div><div class="metric-label">Due this week</div></div>
         <div class="metric-card green"><div class="metric-val" id="m-done">0</div><div class="metric-label">Done today</div></div>
         <div class="metric-card"><div class="metric-val" id="m-jobs">0</div><div class="metric-label">Active jobs</div></div>
       </div>
+      <div class="upcoming-strip" id="missed-strip" style="display:none;background:var(--red-bg);border-color:var(--red)">
+        <div class="upcoming-title" style="color:var(--red)"><i class="ti ti-alert-triangle" style="font-size:13px"></i>Missed deadlines</div>
+        <div class="upcoming-scroll" id="missed-list"></div>
+      </div>
       <div class="upcoming-strip" id="upcoming-strip" style="display:none">
         <div class="upcoming-title"><i class="ti ti-calendar-due" style="font-size:13px"></i>Upcoming deadlines</div>
         <div class="upcoming-scroll" id="upcoming-list"></div>
+      </div>
+      <div class="team-snapshot" id="team-snapshot" style="display:none">
+        <div class="upcoming-title"><i class="ti ti-users" style="font-size:13px"></i>Team snapshot</div>
+        <div id="team-snapshot-rows"></div>
       </div>
       <div class="kanban">
         <div>
@@ -312,11 +385,23 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           <div class="col-header col-todo"><i class="ti ti-clock"></i>To do today<span class="col-count" id="cc-todo"></span></div>
           <div class="kanban-col" id="col-todo"></div>
         </div>
-        <div>
-          <div class="col-header col-done"><i class="ti ti-circle-check"></i>Done<span class="col-count" id="cc-done"></span></div>
-          <div class="kanban-col" id="col-done"></div>
-        </div>
       </div>
+    </div>
+
+    <!-- WEEK -->
+    <div class="view" id="view-week">
+      <div class="view-topbar">
+        <span class="view-title"><i class="ti ti-calendar-week" style="font-size:18px;vertical-align:-3px;margin-right:6px"></i>This week</span>
+        <div class="seg">
+          <button class="seg-btn" onclick="shiftWeek(-1)"><i class="ti ti-chevron-left"></i></button>
+          <button class="seg-btn" onclick="shiftWeek(0)">Today</button>
+          <button class="seg-btn" onclick="shiftWeek(1)"><i class="ti ti-chevron-right"></i></button>
+        </div>
+        <span style="font-size:13px;color:var(--text2)" id="week-range"></span>
+        <select id="week-person-filter" onchange="setPersonFilter('week', this.value)" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;margin-left:auto"></select>
+      </div>
+      <div class="modal-hint" style="margin-bottom:14px"><i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px"></i> Shows tasks with a due date this week, built from the board's own data. The <i class="ti ti-bell" style="font-size:11px;vertical-align:-1px"></i> icon means someone has opened a reminder for that task in Outlook from this board.</div>
+      <div class="week-grid" id="week-grid"></div>
     </div>
 
     <!-- JOBS -->
@@ -329,6 +414,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           <button class="seg-btn" onclick="setTaskFilter('fee','active')" data-v="active">Active</button>
           <button class="seg-btn" onclick="setTaskFilter('fee','done')" data-v="done">Completed</button>
         </div>
+        <select id="fee-person-filter" onchange="setPersonFilter('fee', this.value)" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif"></select>
         <button class="btn btn-blue" onclick="showAddJob('fee')"><i class="ti ti-plus"></i>Add job</button>
       </div>
       <div class="jobs-list" id="fee-list"></div>
@@ -337,16 +423,26 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <!-- ESTIMATING -->
     <div class="view" id="view-estimating">
       <div class="view-topbar">
-        <span class="view-title"><i class="ti ti-calculator" style="font-size:18px;vertical-align:-3px;margin-right:6px"></i>Estimating enquiries</span>
+        <span class="view-title"><i class="ti ti-calculator" style="font-size:18px;vertical-align:-3px;margin-right:6px"></i>Sales & Estimating enquiries</span>
         <span style="font-size:13px;color:var(--text2)" id="est-count"></span>
         <div class="seg" id="est-filter-seg">
           <button class="seg-btn active" onclick="setTaskFilter('est','all')" data-v="all">All</button>
           <button class="seg-btn" onclick="setTaskFilter('est','active')" data-v="active">Active</button>
           <button class="seg-btn" onclick="setTaskFilter('est','done')" data-v="done">Completed</button>
         </div>
+        <select id="est-person-filter" onchange="setPersonFilter('est', this.value)" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif"></select>
         <button class="btn btn-green" onclick="showAddJob('est')"><i class="ti ti-plus"></i>Add enquiry</button>
       </div>
       <div class="jobs-list" id="est-list"></div>
+    </div>
+
+    <!-- PILLARS -->
+    <div class="view" id="view-pillars">
+      <div class="view-topbar">
+        <span class="view-title"><i class="ti ti-shield-check" style="font-size:18px;vertical-align:-3px;margin-right:6px"></i>Non-negotiables</span>
+      </div>
+      <div class="modal-hint" style="margin-bottom:16px"><i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px"></i> These three meetings run every week without exception. A meeting flips to <strong>Missed</strong> the moment its day passes without being marked held — no ranking, just the fact of whether it happened.</div>
+      <div class="pillars-grid" id="pillars-grid"></div>
     </div>
 
   </main>
@@ -373,7 +469,12 @@ const DEFAULT_DATA = {
     {id:'j8',name:'11TUX',stage:'Building permit / site ready',tasks:[]}
   ],
   est: [],
-  staff: []
+  staff: [],
+  pillars: {
+    construction: { day: 'Wednesday', dayIdx: 3, label: 'Construction meeting', desc: 'Discuss jobs onsite', lastHeld: null, heldBy: '', history: [] },
+    precon: { day: 'Tuesday', dayIdx: 2, label: 'Pre-construction meeting', desc: 'Discuss all jobs in pre-construction', lastHeld: null, heldBy: '', history: [] },
+    finance: { day: 'Monday', dayIdx: 1, label: 'Finance meeting', desc: 'Claims, invoices — invoices over purchase orders', lastHeld: null, heldBy: '', history: [] }
+  }
 };
 
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -445,11 +546,15 @@ async function loadData(isPoll) {
     const d = await res.json();
     if (d.record && d.record.fee) data = d.record;
     if (!data.staff) data.staff = [];
+    if (!data.pillars) data.pillars = JSON.parse(JSON.stringify(DEFAULT_DATA.pillars));
+    ensurePillarsShape();
     setSync('ok');
   } catch(e) {
     // Offline fallback: use local cache so the board still opens
     try { const s = localStorage.getItem('lean_bldr_v2'); if (s) { const parsed = JSON.parse(s); if (parsed && parsed.fee) data = parsed; } } catch(_) {}
     if (!data.staff) data.staff = [];
+    if (!data.pillars) data.pillars = JSON.parse(JSON.stringify(DEFAULT_DATA.pillars));
+    ensurePillarsShape();
     setSync('error');
   }
   const ov = document.getElementById('loadingOverlay');
@@ -543,18 +648,26 @@ function renderAll() {
   const d = new Date();
   document.getElementById('date-chip').textContent = d.toLocaleDateString('en-AU', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-  const tasks = allTasks();
+  let tasks = allTasks();
+  const dashPerson = personFilters.dash || '';
+  if (dashPerson === '__unassigned') tasks = tasks.filter(t => !t.assignee);
+  else if (dashPerson) tasks = tasks.filter(t => t.assignee === dashPerson);
   const todayTasks = tasks.filter(t => t.today);
   const critical = todayTasks.filter(t => t.critical && !t.done);
   const todo = todayTasks.filter(t => !t.critical && !t.done);
   const done = todayTasks.filter(t => t.done);
 
-  // Upcoming: tasks with dueDate within 7 days, not already on today board
-  const upcoming = tasks.filter(t => !t.done && t.dueDate && shouldShowOnDash(t.dueDate));
+  // Missed deadlines: overdue, not done — the factual "what got missed" list
+  const missed = tasks.filter(t => !t.done && t.dueDate && dueDiff(t.dueDate) < 0);
+  missed.sort((a,b) => dueDiff(a.dueDate) - dueDiff(b.dueDate)); // most overdue first
+
+  // Upcoming: tasks due in the next 7 days (not yet overdue), not already on today board
+  const upcoming = tasks.filter(t => !t.done && t.dueDate && dueDiff(t.dueDate) !== null && dueDiff(t.dueDate) >= 0 && dueDiff(t.dueDate) <= 7);
   // sort by date
   upcoming.sort((a,b) => dueDiff(a.dueDate) - dueDiff(b.dueDate));
   const weekCount = tasks.filter(t => !t.done && t.dueDate && dueDiff(t.dueDate) !== null && dueDiff(t.dueDate) >= 0 && dueDiff(t.dueDate) <= 7).length;
 
+  document.getElementById('m-missed').textContent = missed.length;
   document.getElementById('m-critical').textContent = critical.length;
   document.getElementById('m-todo').textContent = todo.length;
   document.getElementById('m-done').textContent = done.length;
@@ -563,7 +676,25 @@ function renderAll() {
 
   document.getElementById('cc-critical').textContent = critical.length || '';
   document.getElementById('cc-todo').textContent = todo.length || '';
-  document.getElementById('cc-done').textContent = done.length || '';
+
+  // Missed deadlines strip — the cold hard facts
+  const mStrip = document.getElementById('missed-strip');
+  const mList = document.getElementById('missed-list');
+  if (missed.length) {
+    mStrip.style.display = '';
+    mList.innerHTML = missed.map(t => {
+      const days = Math.abs(dueDiff(t.dueDate));
+      return `<div class="deadline-chip overdue" style="border-left-color:var(--red)">
+        <i class="ti ti-alert-triangle" style="font-size:13px;color:var(--red);flex-shrink:0"></i>
+        <span class="dc-job">${esc(t.jobName)}</span>
+        <span class="dc-task">${esc(t.text)}</span>
+        ${t.assignee ? `<span class="jt-assignee"><i class="ti ti-user" style="font-size:10px"></i>${esc(t.assignee)}</span>` : ''}
+        <span class="dc-date overdue">${days} day${days!==1?'s':''} overdue</span>
+      </div>`;
+    }).join('');
+  } else {
+    mStrip.style.display = 'none';
+  }
 
   // Upcoming strip
   const strip = document.getElementById('upcoming-strip');
@@ -585,12 +716,39 @@ function renderAll() {
     strip.style.display = 'none';
   }
 
+  // Team snapshot — factual counts per person, alphabetical, not ranked
+  const snap = document.getElementById('team-snapshot');
+  const snapRows = document.getElementById('team-snapshot-rows');
+  const staffList = (data.staff || []).slice().sort((a,b) => a.localeCompare(b));
+  if (staffList.length) {
+    const allT = allTasks();
+    snap.style.display = '';
+    const rows = staffList.map(name => {
+      const mine = allT.filter(t => t.assignee === name);
+      const ov = mine.filter(t => !t.done && t.dueDate && dueDiff(t.dueDate) < 0).length;
+      const cr = mine.filter(t => !t.done && t.critical && t.today).length;
+      const wk = mine.filter(t => !t.done && t.dueDate && dueDiff(t.dueDate) !== null && dueDiff(t.dueDate) >= 0 && dueDiff(t.dueDate) <= 7).length;
+      return `<div class="ts-row">
+        <span class="ts-name">${esc(name)}</span>
+        <span class="ts-num ${ov?'ts-overdue':'ts-zero'}">${ov}</span>
+        <span class="ts-num ${cr?'':'ts-zero'}">${cr}</span>
+        <span class="ts-num ${wk?'':'ts-zero'}">${wk}</span>
+      </div>`;
+    }).join('');
+    snapRows.innerHTML = `<div class="ts-row ts-head"><span>Name</span><span class="ts-num">Overdue</span><span class="ts-num">Critical</span><span class="ts-num">Due 7d</span></div>` + rows;
+  } else {
+    snap.style.display = 'none';
+  }
+
+  populatePersonFilter('dash');
   document.getElementById('col-critical').innerHTML = critical.length ? critical.map(t => taskCardHTML(t)).join('') : '<div class="col-empty">No critical tasks</div>';
   document.getElementById('col-todo').innerHTML = todo.length ? todo.map(t => taskCardHTML(t)).join('') : '<div class="col-empty">Nothing else on today</div>';
-  document.getElementById('col-done').innerHTML = done.length ? done.map(t => taskCardHTML(t)).join('') : '<div class="col-empty">Get cracking</div>';
 
   renderFee();
   renderEst();
+  renderWeek();
+  renderPillarsStrip();
+  renderPillars();
 }
 
 function substepProgress(substeps) {
@@ -647,6 +805,7 @@ function renderFee() {
   const fc = document.getElementById('fee-count');
   if (!el) return;
   if (fc) fc.textContent = data.fee.length + ' job' + (data.fee.length !== 1 ? 's' : '');
+  populatePersonFilter('fee');
   el.innerHTML = data.fee.length ? data.fee.map(j => jobRowHTML(j,'fee')).join('') : '<div class="empty-state"><i class="ti ti-briefcase"></i>No fee-paid jobs yet</div>';
 }
 
@@ -655,26 +814,285 @@ function renderEst() {
   const ec = document.getElementById('est-count');
   if (!el) return;
   if (ec) ec.textContent = data.est.length + ' enquir' + (data.est.length!==1?'ies':'y');
-  el.innerHTML = data.est.length ? data.est.map(j => jobRowHTML(j,'est')).join('') : '<div class="empty-state"><i class="ti ti-calculator"></i>No estimating enquiries yet</div>';
+  populatePersonFilter('est');
+  el.innerHTML = data.est.length ? data.est.map(j => jobRowHTML(j,'est')).join('') : '<div class="empty-state"><i class="ti ti-calculator"></i>No sales & estimating enquiries yet</div>';
+}
+
+let weekOffset = 0;
+function shiftWeek(delta) {
+  weekOffset = delta === 0 ? 0 : weekOffset + delta;
+  renderWeek();
+}
+function fmtDateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function getWeekDates() {
+  const t = today();
+  const dow = t.getDay(); // 0 Sun..6 Sat
+  const mondayOffset = dow === 0 ? -6 : 1 - dow;
+  const monday = new Date(t);
+  monday.setDate(t.getDate() + mondayOffset + (weekOffset * 7));
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    days.push(d);
+  }
+  return days;
+}
+function renderWeek() {
+  const grid = document.getElementById('week-grid');
+  if (!grid) return;
+  populatePersonFilter('week');
+  const person = personFilters.week || '';
+  let tasks = allTasks().filter(t => t.dueDate);
+  if (person === '__unassigned') tasks = tasks.filter(t => !t.assignee);
+  else if (person) tasks = tasks.filter(t => t.assignee === person);
+
+  const days = getWeekDates();
+  const rangeEl = document.getElementById('week-range');
+  if (rangeEl) {
+    const opts = {day:'numeric', month:'short'};
+    rangeEl.textContent = days[0].toLocaleDateString('en-AU', opts) + ' – ' + days[6].toLocaleDateString('en-AU', opts) + (weekOffset === 0 ? ' (this week)' : '');
+  }
+  const todayKey = fmtDateKey(today());
+  grid.innerHTML = days.map(d => {
+    const key = fmtDateKey(d);
+    const dayTasks = tasks.filter(t => t.dueDate === key).sort((a,b) => (b.critical - a.critical));
+    const cards = dayTasks.map(t => `
+      <div class="week-task ${t.done?'wt-done':''} ${t.critical && !t.done?'wt-critical':''}">
+        <div class="week-task-job">${esc(t.jobName)}</div>
+        <div>${esc(t.text)}</div>
+        <div class="week-task-meta">
+          ${t.assignee ? `<span class="jt-assignee"><i class="ti ti-user" style="font-size:10px"></i>${esc(t.assignee)}</span>` : ''}
+          ${t.reminderSet ? '<i class="ti ti-bell-filled" style="font-size:12px;color:var(--amber)" title="A calendar reminder was opened in Outlook for this task"></i>' : ''}
+        </div>
+      </div>`).join('');
+    return `<div class="week-day ${key===todayKey?'is-today':''}">
+      <div class="week-day-head">${d.toLocaleDateString('en-AU',{weekday:'short'})}</div>
+      <div class="week-day-date">${d.getDate()}</div>
+      ${dayTasks.length ? cards : '<div class="week-empty">No due tasks</div>'}
+    </div>`;
+  }).join('');
+}
+
+// ---- Non-negotiable business pillars ----
+const PILLAR_ORDER = ['construction', 'precon', 'finance'];
+function ensurePillarsShape() {
+  if (!data.pillars) return;
+  PILLAR_ORDER.forEach(key => {
+    if (data.pillars[key] && !data.pillars[key].history) data.pillars[key].history = [];
+  });
+}
+function currentMonday() {
+  const t = today();
+  const dow = t.getDay();
+  const offset = dow === 0 ? -6 : 1 - dow;
+  const m = new Date(t);
+  m.setDate(t.getDate() + offset);
+  return m;
+}
+function pillarInfo(key) {
+  const p = data.pillars[key];
+  const monday = currentMonday();
+  const heldThisWeek = p.lastHeld ? (parseDue(p.lastHeld) >= monday) : false;
+  let dow = today().getDay();
+  if (dow === 0) dow = 7;
+  const status = heldThisWeek ? 'held' : (dow > p.dayIdx ? 'missed' : 'pending');
+  return { p, status };
+}
+function renderPillarsStrip() {
+  const el = document.getElementById('pillars-strip');
+  if (!el || !data.pillars) return;
+  el.innerHTML = PILLAR_ORDER.map(key => {
+    const { p, status } = pillarInfo(key);
+    const cls = status === 'held' ? 'pcm-held' : status === 'missed' ? 'pcm-missed' : 'pcm-pending';
+    const icon = status === 'held' ? 'ti-circle-check' : status === 'missed' ? 'ti-alert-triangle' : 'ti-clock';
+    const label = status === 'held' ? 'Held' : status === 'missed' ? 'Missed' : 'Due ' + p.day;
+    return `<div class="pillar-chip ${cls}" onclick="switchTab('pillars')"><i class="ti ${icon}"></i>${esc(p.label)}: ${label}</div>`;
+  }).join('');
+}
+function renderPillars() {
+  const grid = document.getElementById('pillars-grid');
+  if (!grid || !data.pillars) return;
+  grid.innerHTML = PILLAR_ORDER.map(key => {
+    const { p, status } = pillarInfo(key);
+    const cls = status === 'held' ? 'pc-held' : status === 'missed' ? 'pc-missed' : 'pc-pending';
+    const statusLabel = status === 'held' ? 'Held this week' : status === 'missed' ? 'Missed' : 'Not held yet this week';
+    const lastHeldTxt = p.lastHeld
+      ? 'Last held ' + parseDue(p.lastHeld).toLocaleDateString('en-AU', {day:'numeric',month:'short'}) + (p.heldBy ? ' by ' + esc(p.heldBy) : '')
+      : 'Never marked held';
+    let checklist = '';
+    if (key === 'construction') {
+      const jobs = data.fee.filter(j => j.stage === 'Under construction');
+      checklist = jobs.length ? jobs.map(j => pillarJobItemHTML(j)).join('')
+        : '<div class="pillar-check-item" style="color:var(--text3)">No jobs currently under construction</div>';
+    } else if (key === 'precon') {
+      const jobs = data.fee.filter(j => j.stage !== 'Under construction' && j.stage !== 'Handed over — maintenance period');
+      checklist = jobs.length ? jobs.map(j => pillarJobItemHTML(j)).join('')
+        : '<div class="pillar-check-item" style="color:var(--text3)">No jobs currently in pre-construction</div>';
+    } else if (key === 'finance') {
+      const agenda = ['Claims reviewed', 'Invoices reviewed', 'Invoices checked against Purchase Orders'].map(x => `<div class="pillar-check-item"><i class="ti ti-receipt" style="font-size:12px;color:var(--text3)"></i>${x}</div>`).join('');
+      const jobs = data.fee.slice();
+      const jobList = jobs.length ? jobs.map(j => pillarJobItemHTML(j)).join('') : '<div class="pillar-check-item" style="color:var(--text3)">No jobs on the board yet</div>';
+      checklist = agenda + '<div class="pillar-check-item" style="border-bottom:none;padding-top:10px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase">All jobs</div>' + jobList;
+    }
+    return `<div class="pillar-card ${cls}">
+      <div class="pillar-head">
+        <div>
+          <div class="pillar-title">${esc(p.label)}</div>
+          <div class="pillar-day">Every ${esc(p.day)}</div>
+        </div>
+      </div>
+      <div class="pillar-desc">${esc(p.desc)}</div>
+      <span class="pillar-status st-${status}"><i class="ti ${status==='held'?'ti-circle-check':status==='missed'?'ti-alert-triangle':'ti-clock'}" style="font-size:12px"></i>${statusLabel}</span>
+      <div class="pillar-lastheld">${lastHeldTxt}</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-dark btn-sm" onclick="showMarkPillarHeld('${key}')"><i class="ti ti-check"></i>Mark held</button>
+        <button class="btn btn-sm" onclick="togglePillarHistory('${key}')"><i class="ti ti-notes"></i>Minutes${p.history&&p.history.length?' ('+p.history.length+')':''}</button>
+      </div>
+      ${openPillarHistory.has(key) ? pillarHistoryHTML(p) : ''}
+      <div class="pillar-checklist">${checklist}</div>
+    </div>`;
+  }).join('');
+}
+function pillarHistoryHTML(p) {
+  const hist = p.history || [];
+  if (!hist.length) return '<div class="pillar-history"><div class="pillar-history-empty">No minutes recorded yet</div></div>';
+  return '<div class="pillar-history">' + hist.map(h => {
+    const d = parseDue(h.date);
+    const dl = d ? d.toLocaleDateString('en-AU', {weekday:'short', day:'numeric', month:'short'}) : h.date;
+    return `<div class="pillar-history-entry">
+      <div class="pillar-history-head">${dl}${h.heldBy ? ' — ' + esc(h.heldBy) : ''}</div>
+      <div class="pillar-history-notes">${h.minutes ? esc(h.minutes) : '<em style="color:var(--text3)">No notes added</em>'}</div>
+    </div>`;
+  }).join('') + '</div>';
+}
+function showMarkPillarHeld(key) {
+  const p = data.pillars[key];
+  const staff = data.staff || [];
+  document.getElementById('modal-area').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3><i class="ti ti-check" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Mark ${esc(p.label)} held</h3>
+        <label>Held by</label>
+        <select id="pillar-heldby">
+          <option value="">Not specified</option>
+          ${staff.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('')}
+        </select>
+        <label>Meeting minutes</label>
+        <textarea id="pillar-minutes" class="pillar-notes" style="min-height:90px" placeholder="What was discussed and decided today…"></textarea>
+        <div class="modal-hint">This is saved as a dated record for this meeting — it doesn't overwrite last week's, it builds a running history.</div>
+        <div class="modal-btns">
+          <button class="btn" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-dark" onclick="confirmMarkPillarHeld('${key}')"><i class="ti ti-check"></i>Confirm</button>
+        </div>
+      </div>
+    </div>`;
+}
+function confirmMarkPillarHeld(key) {
+  const heldBy = document.getElementById('pillar-heldby').value;
+  const minutes = document.getElementById('pillar-minutes').value.trim();
+  const dateStr = fmtDateKey(today());
+  data.pillars[key].lastHeld = dateStr;
+  data.pillars[key].heldBy = heldBy;
+  if (!data.pillars[key].history) data.pillars[key].history = [];
+  data.pillars[key].history.unshift({ date: dateStr, heldBy, minutes });
+  save(); closeModal(); renderAll();
+}
+
+let openPillarJobs = new Set();
+let openPillarHistory = new Set();
+function togglePillarHistory(key) {
+  if (openPillarHistory.has(key)) openPillarHistory.delete(key); else openPillarHistory.add(key);
+  renderPillars();
+}
+function togglePillarJob(jid) {
+  if (openPillarJobs.has(jid)) openPillarJobs.delete(jid); else openPillarJobs.add(jid);
+  renderPillars();
+}
+function pillarJobItemHTML(j) {
+  const isOpen = openPillarJobs.has(j.id);
+  const openTasks = (j.tasks || []).filter(t => !t.done);
+  return `<div class="pillar-job-item">
+    <div class="pillar-job-row" onclick="togglePillarJob('${j.id}')">
+      <i class="ti ti-chevron-${isOpen?'down':'right'}" style="font-size:12px;color:var(--text3)"></i>
+      <i class="ti ti-building" style="font-size:12px;color:var(--text3)"></i>
+      <span style="flex:1">${esc(j.name)}</span>
+      <span style="color:var(--text3);font-size:11px">${openTasks.length} open</span>
+      <span style="color:var(--text3);font-size:11px">${esc(j.stage)}</span>
+    </div>
+    ${isOpen ? `
+    <div class="pillar-job-body">
+      ${openTasks.length ? `<div class="pillar-job-tasks">${openTasks.map(t => `<div class="pillar-job-task">${t.critical?'<i class="ti ti-alert-triangle" style="font-size:10px;color:var(--red)"></i> ':''}${esc(t.text)}</div>`).join('')}</div>` : '<div class="pillar-job-tasks-empty">No open tasks on this job</div>'}
+      <label style="margin-top:8px">Meeting notes</label>
+      <textarea class="pillar-notes" data-jid="${j.id}" placeholder="Notes from this week's meeting…" onblur="savePillarNote('${j.id}', this.value)">${esc(j.notes||'')}</textarea>
+      <div class="add-row" style="margin-top:8px">
+        <input type="text" placeholder="Add a task for this job…" id="pillar-task-${j.id}" onkeydown="if(event.key==='Enter')addPillarTask('${j.id}')">
+        <button class="btn btn-sm btn-dark" onclick="addPillarTask('${j.id}')"><i class="ti ti-plus"></i>Add</button>
+      </div>
+      <button class="btn btn-sm" style="margin-top:8px" onclick="jumpToJob('${j.id}')"><i class="ti ti-external-link"></i>Open this job</button>
+    </div>` : ''}
+  </div>`;
+}
+function savePillarNote(jid, val) {
+  const j = getJob(jid, 'fee'); if (!j) return;
+  j.notes = val;
+  save();
+}
+function addPillarTask(jid) {
+  const j = getJob(jid, 'fee'); if (!j) return;
+  const inp = document.getElementById('pillar-task-' + jid);
+  const text = (inp.value || '').trim();
+  if (!text) { inp.focus(); return; }
+  if (!j.tasks) j.tasks = [];
+  j.tasks.push({ id:'t'+Date.now(), text, done:false, today:true, critical:false, dueDate:'', assignee:'', substeps:[] });
+  save();
+  renderAll();
+}
+function jumpToJob(jid) {
+  openJobs.add(jid);
+  closeModal();
+  switchTab('jobs');
 }
 
 let taskFilters = { fee: 'all', est: 'all' };
+let personFilters = { fee: '', est: '', dash: '', week: '' };
 function setTaskFilter(type, val) {
   taskFilters[type] = val;
   document.querySelectorAll('#' + type + '-filter-seg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === val));
   type === 'fee' ? renderFee() : renderEst();
+}
+function setPersonFilter(type, val) {
+  personFilters.fee = val;
+  personFilters.est = val;
+  personFilters.dash = val;
+  personFilters.week = val;
+  renderAll();
+}
+function populatePersonFilter(type) {
+  const sel = document.getElementById(type + '-person-filter');
+  if (!sel) return;
+  sel.classList.add('person-filter-select');
+  const current = personFilters[type] || '';
+  const staff = data.staff || [];
+  sel.innerHTML = '<option value="">Everyone</option>' + staff.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('') + '<option value="__unassigned">Unassigned</option>';
+  sel.value = current;
 }
 
 function jobRowHTML(j, type) {
   const isOpen = openJobs.has(j.id);
   const allJobTasks = j.tasks || [];
   const filter = taskFilters[type] || 'all';
-  const tasks = filter === 'active' ? allJobTasks.filter(t => !t.done) : filter === 'done' ? allJobTasks.filter(t => t.done) : allJobTasks;
+  const person = personFilters[type] || '';
+  let tasks = filter === 'active' ? allJobTasks.filter(t => !t.done) : filter === 'done' ? allJobTasks.filter(t => t.done) : allJobTasks;
+  if (person === '__unassigned') tasks = tasks.filter(t => !t.assignee);
+  else if (person) tasks = tasks.filter(t => t.assignee === person);
   const todayCount = allJobTasks.filter(t => t.today && !t.done).length;
   const critCount = allJobTasks.filter(t => t.critical && t.today && !t.done).length;
   const isFee = type === 'fee';
   const sc = isFee ? spClass(j.stage) : 'sp-0';
-  const pill = isFee ? j.stage : 'Estimating';
+  const pill = isFee ? j.stage : 'Sales & Estimating';
 
   const taskRows = tasks.map(t => {
     const ssOpen = openSubsteps.has(t.id);
@@ -744,7 +1162,7 @@ function jobRowHTML(j, type) {
     </div>
     <div class="job-body ${isOpen?'open':''}">
       <div class="job-meta">
-        ${isFee ? `<select class="stage-select" onchange="changeStage('${j.id}',this.value)">${FEE_STAGES.map(s=>`<option ${s===j.stage?'selected':''}>${s}</option>`).join('')}</select>` : '<span style="font-size:12px;color:var(--text2)">Estimating enquiry</span>'}
+        ${isFee ? `<select class="stage-select" onchange="changeStage('${j.id}',this.value)">${FEE_STAGES.map(s=>`<option ${s===j.stage?'selected':''}>${s}</option>`).join('')}</select>` : '<span style="font-size:12px;color:var(--text2)">Sales & Estimating enquiry</span>'}
         ${!isFee ? `<button class="promote-btn" onclick="promoteToFee('${j.id}')"><i class="ti ti-arrow-up" style="font-size:12px;vertical-align:-1px"></i> Move to fee-paid</button>` : ''}
       </div>
       ${tasks.length ? `<div class="job-tasks">${taskRows}</div>` : `<div class="no-tasks">${allJobTasks.length ? 'No tasks match this filter' : 'No tasks yet — add one below'}</div>`}
@@ -888,14 +1306,17 @@ function addToCalendar(jid, tid, type) {
   const endM = String(endMinTotal%60).padStart(2,'0');
   const enddt = `${t.dueDate}T${endH}:${endM}:00`;
   const subject = j.name + ' — ' + t.text;
-  const body = (t.assignee ? 'Assigned to: ' + t.assignee + '. ' : '') + 'From the Lean Builder Board' + (t.critical ? ' (Critical)' : '');
+  const body = (t.assignee ? 'Assigned to: ' + t.assignee + '. ' : '') + 'From the Hotondo Homes Belmont Action List' + (t.critical ? ' (Critical)' : '');
   const params = new URLSearchParams({
     path: '/calendar/action/compose', rru: 'addevent',
     startdt, enddt, subject, body, allday: 'false'
   });
   const url = 'https://outlook.office.com/calendar/0/deeplink/compose?' + params.toString();
   window.open(url, '_blank');
-  showToast('Opening Outlook — click Save to add the reminder');
+  t.reminderSet = true;
+  save();
+  renderAll();
+  showToast('Opening Outlook — click Save there to confirm the reminder');
 }
 function showToast(msg) {
   let el = document.getElementById('lbb-toast');
@@ -994,7 +1415,7 @@ function showAddJob(type) {
   document.getElementById('modal-area').innerHTML = `
     <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
       <div class="modal">
-        <h3>${isFee?'New fee-paid job':'New estimating enquiry'}</h3>
+        <h3>${isFee?'New fee-paid job':'New sales & estimating enquiry'}</h3>
         <label>${isFee?'Job reference':'Client / project name'}</label>
         <input id="mj-name" placeholder="${isFee?'e.g. 99JONES':'e.g. Brown – extension'}" autofocus>
         ${isFee?`<label>Stage</label><select id="mj-stage">${FEE_STAGES.map(s=>`<option>${s}</option>`).join('')}</select>`:''}
